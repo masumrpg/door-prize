@@ -6,8 +6,6 @@ import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 
-
-
 // Generate 1400 sample employees
 const generateEmployees = (): Employee[] => {
     const names: string[] = [
@@ -28,14 +26,70 @@ const generateEmployees = (): Employee[] => {
 };
 
 const initialPrizes: Prize[] = [
-    { id: 'kulkas', name: 'Kulkas 2 Pintu', imageUrl: '🧊', color: 'from-blue-500 to-cyan-500', stock: 5, totalStock: 5 },
-    { id: 'tv', name: 'Smart TV 55"', imageUrl: '📺', color: 'from-purple-500 to-pink-500', stock: 3, totalStock: 3 },
-    { id: 'iphone', name: 'iPhone 15 Pro', imageUrl: '📱', color: 'from-gray-800 to-gray-600', stock: 2, totalStock: 2 },
-    { id: 'macbook', name: 'MacBook Air M3', imageUrl: '💻', color: 'from-indigo-500 to-purple-500', stock: 1, totalStock: 1 },
-    { id: 'watch', name: 'Apple Watch Series 9', imageUrl: '⌚', color: 'from-green-500 to-emerald-500', stock: 4, totalStock: 4 },
-    { id: 'voucher', name: 'Voucher Belanja 5 Juta', imageUrl: '💳', color: 'from-yellow-500 to-orange-500', stock: 10, totalStock: 10 },
-    { id: 'sepeda', name: 'Sepeda Gunung', imageUrl: '🚵', color: 'from-teal-500 to-blue-500', stock: 2, totalStock: 2 },
-    { id: 'airpods', name: 'AirPods Pro', imageUrl: '🎧', color: 'from-pink-500 to-red-500', stock: 6, totalStock: 6 }
+    {
+        id: 'kulkas',
+        name: 'Kulkas 2 Pintu',
+        imageUrl: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=300&h=300&fit=crop&crop=center',
+        color: 'from-blue-500 to-cyan-500',
+        stock: 5,
+        totalStock: 5
+    },
+    {
+        id: 'tv',
+        name: 'Smart TV 55"',
+        imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&h=300&fit=crop&crop=center',
+        color: 'from-purple-500 to-pink-500',
+        stock: 3,
+        totalStock: 3
+    },
+    {
+        id: 'iphone',
+        name: 'iPhone 15 Pro',
+        imageUrl: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop&crop=center',
+        color: 'from-gray-800 to-gray-600',
+        stock: 2,
+        totalStock: 2
+    },
+    {
+        id: 'macbook',
+        name: 'MacBook Air M3',
+        imageUrl: 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300&h=300&fit=crop&crop=center',
+        color: 'from-indigo-500 to-purple-500',
+        stock: 1,
+        totalStock: 1
+    },
+    {
+        id: 'watch',
+        name: 'Apple Watch Series 9',
+        imageUrl: 'https://images.unsplash.com/photo-1551816230-ef5deaed4a26?w=300&h=300&fit=crop&crop=center',
+        color: 'from-green-500 to-emerald-500',
+        stock: 4,
+        totalStock: 4
+    },
+    {
+        id: 'voucher',
+        name: 'Voucher Belanja 5 Juta',
+        imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop&crop=center',
+        color: 'from-yellow-500 to-orange-500',
+        stock: 10,
+        totalStock: 10
+    },
+    {
+        id: 'sepeda',
+        name: 'Sepeda Gunung',
+        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop&crop=center',
+        color: 'from-teal-500 to-blue-500',
+        stock: 2,
+        totalStock: 2
+    },
+    {
+        id: 'airpods',
+        name: 'AirPods Pro',
+        imageUrl: 'https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?w=300&h=300&fit=crop&crop=center',
+        color: 'from-pink-500 to-red-500',
+        stock: 6,
+        totalStock: 6
+    }
 ];
 
 const DoorprizeApp: React.FC = () => {
@@ -270,7 +324,22 @@ const DoorprizeApp: React.FC = () => {
                                     </div>
                                 )}
                                 <div className="text-center text-white">
-                                    <div className="text-6xl mb-4">{currentPrize.imageUrl}</div>
+                                    <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
+                                        <img
+                                            src={currentPrize.imageUrl}
+                                            alt={currentPrize.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                // Fallback ke emoji jika gambar gagal load
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                                const parent = target.parentElement;
+                                                if (parent) {
+                                                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-6xl bg-white/20 rounded-2xl">🎁</div>';
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                     <h2 className="text-3xl font-bold mb-2">{currentPrize.name}</h2>
                                     <div className="flex items-center justify-center gap-4 text-lg">
                                         <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
@@ -421,7 +490,21 @@ const DoorprizeApp: React.FC = () => {
                                             className="bg-white/20 rounded-lg p-4 border border-white/30"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="text-2xl">{winner.prize.imageUrl}</div>
+                                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img
+                                                        src={winner.prize.imageUrl}
+                                                        alt={winner.prize.name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const parent = target.parentElement;
+                                                            if (parent) {
+                                                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl bg-white/20 rounded-lg">🎁</div>';
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <div className="flex items-center gap-2">
