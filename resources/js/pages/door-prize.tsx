@@ -1,29 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, AlertCircle } from 'lucide-react';
+import { Employee, Prize, Winner } from '@/interface';
+import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
+import FinishedPopup from '@/components/doorprize/FinishedPopup';
+import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 
-// Types
-interface Employee {
-    id: string;
-    name: string;
-}
 
-interface Prize {
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-    stock: number;
-    totalStock: number;
-}
-
-interface Winner {
-    id: string;
-    employee: Employee;
-    prize: Prize;
-    timestamp: string;
-    winnerNumber: number;
-}
 
 // Generate 1400 sample employees
 const generateEmployees = (): Employee[] => {
@@ -211,181 +194,6 @@ const DoorprizeApp: React.FC = () => {
         const nextIndex = (currentPrizeIndex + 1) % prizes.length;
         setCurrentPrizeIndex(nextIndex);
     }, [currentPrizeIndex, prizes.length]);
-
-    // All Winners Modal Component
-    const AllWinnersModal = () => (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowAllPrizes(false)}
-        >
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-hidden"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-                        <Trophy className="text-yellow-400" />
-                        Semua Pemenang Doorprize
-                    </h2>
-                    <button
-                        onClick={() => setShowAllPrizes(false)}
-                        className="text-white hover:text-red-400 transition-colors"
-                    >
-                        <X size={32} />
-                    </button>
-                </div>
-
-                <div className="grid lg:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh]">
-                    {prizes.map(prize => {
-                        const prizeWinners = winners.filter(w => w.prize.id === prize.id);
-                        return (
-                            <div key={prize.id} className={`bg-gradient-to-r ${prize.color} rounded-xl p-6`}>
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="text-4xl">{prize.emoji}</div>
-                                    <div className="text-white">
-                                        <h3 className="text-xl font-bold">{prize.name}</h3>
-                                        <p className="text-sm opacity-90">
-                                            {prizeWinners.length} dari {prize.totalStock} terbagi
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2 max-h-60 overflow-y-auto">
-                                    {prizeWinners.length === 0 ? (
-                                        <p className="text-white/70 text-center py-4">Belum ada pemenang</p>
-                                    ) : (
-                                        prizeWinners.map(winner => (
-                                            <div key={winner.id} className="bg-white/20 rounded-lg p-3">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
-                                                                #{winner.winnerNumber}
-                                                            </span>
-                                                            <span className="text-white font-bold">{winner.employee.name}</span>
-                                                        </div>
-                                                        <p className="text-white/70 text-xs">ID: {winner.employee.id}</p>
-                                                    </div>
-                                                    <span className="text-white/70 text-xs">{winner.timestamp}</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-white/20">
-                    <div className="grid grid-cols-3 gap-4 text-center text-white">
-                        <div>
-                            <div className="text-2xl font-bold text-yellow-400">{winners.length}</div>
-                            <div className="text-sm opacity-80">Total Pemenang</div>
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold text-green-400">{prizes.filter(p => p.stock === 0).length}</div>
-                            <div className="text-sm opacity-80">Hadiah Terbagi</div>
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold text-blue-400">{prizes.reduce((sum, p) => sum + (p.totalStock - p.stock), 0)}</div>
-                            <div className="text-sm opacity-80">Total Item Terbagi</div>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-
-    // Popup Components
-    const FinishedPopup = () => (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0, y: -50 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0, y: 50 }}
-                className="bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl p-8 max-w-md w-full text-center text-white shadow-2xl"
-            >
-                <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="text-6xl mb-4"
-                >
-                    🎉
-                </motion.div>
-                <h2 className="text-2xl font-bold mb-4">Selamat!</h2>
-                <p className="text-lg mb-6">
-                    Semua hadiah doorprize telah terbagi kepada para pemenang!<br/>
-                    Terima kasih atas partisipasi semua karyawan.
-                </p>
-                <div className="flex gap-3">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                            setShowFinishedPopup(false);
-                            setShowAllPrizes(true);
-                        }}
-                        className="flex-1 px-6 py-3 bg-white/20 rounded-lg font-bold hover:bg-white/30 transition-colors"
-                    >
-                        Lihat Semua Pemenang
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowFinishedPopup(false)}
-                        className="flex-1 px-6 py-3 bg-yellow-500 text-black rounded-lg font-bold hover:bg-yellow-400 transition-colors"
-                    >
-                        OK
-                    </motion.button>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-
-    const StockFinishedPopup = () => (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-8 max-w-md w-full text-center text-white shadow-2xl"
-            >
-                <div className="text-5xl mb-4">
-                    <AlertCircle size={60} className="mx-auto text-yellow-300" />
-                </div>
-                <h2 className="text-2xl font-bold mb-4">Stok Habis!</h2>
-                <p className="text-lg mb-6">
-                    Hadiah <strong>{currentPrize?.name}</strong> sudah habis terbagi!<br/>
-                    Melanjutkan ke hadiah berikutnya...
-                </p>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowStockFinishedPopup(false)}
-                    className="px-8 py-3 bg-yellow-500 text-black rounded-lg font-bold hover:bg-yellow-400 transition-colors"
-                >
-                    OK, Lanjut
-                </motion.button>
-            </motion.div>
-        </motion.div>
-    );
 
     if (!currentPrize && allPrizesFinished) {
         return (
@@ -604,7 +412,7 @@ const DoorprizeApp: React.FC = () => {
                                 <p className="text-purple-200 text-center py-8">Belum ada pemenang untuk hadiah ini</p>
                             ) : (
                                 <div className="space-y-3">
-                                    {currentPrizeWinners.map((winner, index) => (
+                                    {currentPrizeWinners.map((winner) => (
                                         <motion.div
                                             key={winner.id}
                                             initial={{ opacity: 0, x: 50 }}
@@ -650,32 +458,32 @@ const DoorprizeApp: React.FC = () => {
                 </div>
 
                 {/* Winner Celebration Animation */}
-                <AnimatePresence>
-                    {showWinner && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
-                        >
-                            <motion.div
-                                initial={{ scale: 0, rotate: -180 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                exit={{ scale: 0, rotate: 180 }}
-                                transition={{ duration: 0.8, ease: "backOut" }}
-                                className="text-8xl"
-                            >
-                                🎊
-                            </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {/*<AnimatePresence>*/}
+                {/*    {showWinner && (*/}
+                {/*        <motion.div*/}
+                {/*            initial={{ opacity: 0 }}*/}
+                {/*            animate={{ opacity: 1 }}*/}
+                {/*            exit={{ opacity: 0 }}*/}
+                {/*            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"*/}
+                {/*        >*/}
+                {/*            <motion.div*/}
+                {/*                initial={{ scale: 0, rotate: -180 }}*/}
+                {/*                animate={{ scale: 1, rotate: 0 }}*/}
+                {/*                exit={{ scale: 0, rotate: 180 }}*/}
+                {/*                transition={{ duration: 0.8, ease: "backOut" }}*/}
+                {/*                className="text-8xl"*/}
+                {/*            >*/}
+                {/*                🎊*/}
+                {/*            </motion.div>*/}
+                {/*        </motion.div>*/}
+                {/*    )}*/}
+                {/*</AnimatePresence>*/}
 
                 {/* Popups */}
                 <AnimatePresence>
-                    {showFinishedPopup && <FinishedPopup />}
-                    {showStockFinishedPopup && <StockFinishedPopup />}
-                    {showAllPrizes && <AllWinnersModal />}
+                    {showFinishedPopup && <FinishedPopup setShowAllPrizes={setShowAllPrizes} setShowFinishedPopup={setShowFinishedPopup} />}
+                    {showStockFinishedPopup && <StockFinishedPopup currentPrize={currentPrize} setShowStockFinishedPopup={setShowStockFinishedPopup} />}
+                    {showAllPrizes && <AllWinnersModal prizes={prizes} winners={winners} setShowAllPrizes={setShowAllPrizes} />}
                 </AnimatePresence>
             </div>
         </div>
