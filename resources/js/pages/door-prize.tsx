@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package } from 'lucide-react';
+import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, X, CheckCircle, AlertCircle } from 'lucide-react';
 
 // Types
 interface Employee {
@@ -66,6 +66,11 @@ const DoorprizeApp: React.FC = () => {
     const [speed, setSpeed] = useState<number>(50);
     const [spinCounter, setSpinCounter] = useState<number>(0);
 
+    // New states for popups and all prizes view
+    const [showFinishedPopup, setShowFinishedPopup] = useState<boolean>(false);
+    const [showAllPrizes, setShowAllPrizes] = useState<boolean>(false);
+    const [showStockFinishedPopup, setShowStockFinishedPopup] = useState<boolean>(false);
+
     // Get current prize (show all prizes, not just available ones)
     const currentPrize = useMemo(() => {
         if (prizes.length === 0) return null;
@@ -84,6 +89,18 @@ const DoorprizeApp: React.FC = () => {
         const currentPrizeWinnerIds = currentPrizeWinners.map(w => w.employee.id);
         return employees.filter(emp => !currentPrizeWinnerIds.includes(emp.id));
     }, [employees, currentPrizeWinners, currentPrize]);
+
+    // Check if all prizes are out of stock
+    const allPrizesFinished = useMemo(() => {
+        return prizes.every(prize => prize.stock === 0);
+    }, [prizes]);
+
+    // Effect to show finished popup when all prizes are done
+    useEffect(() => {
+        if (allPrizesFinished && winners.length > 0 && !showFinishedPopup) {
+            setShowFinishedPopup(true);
+        }
+    }, [allPrizesFinished, winners.length, showFinishedPopup]);
 
     // Spinning effect with useCallback to prevent re-renders
     const spinEmployee = useCallback(() => {
@@ -143,12 +160,19 @@ const DoorprizeApp: React.FC = () => {
                         : prize
                 ));
 
-                // Move to next available prize if current is exhausted
+                // Check if current prize stock is finished
                 if (currentPrize.stock === 1) {
+                    setTimeout(() => {
+                        setShowStockFinishedPopup(true);
+                    }, 2000);
+
+                    // Move to next available prize if current is exhausted
                     const nextAvailablePrizes = prizes.filter(p => p.id !== currentPrize.id && p.stock > 0);
                     if (nextAvailablePrizes.length > 0) {
                         const nextIndex = prizes.findIndex(p => p.id === nextAvailablePrizes[0].id);
-                        setCurrentPrizeIndex(nextIndex);
+                        setTimeout(() => {
+                            setCurrentPrizeIndex(nextIndex);
+                        }, 3000);
                     }
                 }
             }
@@ -170,12 +194,12 @@ const DoorprizeApp: React.FC = () => {
         setCurrentPrizeIndex(0);
         setCurrentEmployee(employees[0]);
         setSpinCounter(0);
+        setShowFinishedPopup(false);
+        setShowStockFinishedPopup(false);
     }, [employees]);
 
     const goToAllWinners = useCallback(() => {
-        // This would be handled by Inertia navigation in real app
-        console.log('Navigate to all winners page');
-        alert('Navigasi ke halaman semua pemenang (implementasi dengan Inertia router)');
+        setShowAllPrizes(true);
     }, []);
 
     const goToPrevPrize = useCallback(() => {
@@ -188,12 +212,182 @@ const DoorprizeApp: React.FC = () => {
         setCurrentPrizeIndex(nextIndex);
     }, [currentPrizeIndex, prizes.length]);
 
-    // Check if all prizes are out of stock
-    const allPrizesFinished = useMemo(() => {
-        return prizes.every(prize => prize.stock === 0);
-    }, [prizes]);
+    // All Winners Modal Component
+    const AllWinnersModal = () => (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAllPrizes(false)}
+        >
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-hidden"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                        <Trophy className="text-yellow-400" />
+                        Semua Pemenang Doorprize
+                    </h2>
+                    <button
+                        onClick={() => setShowAllPrizes(false)}
+                        className="text-white hover:text-red-400 transition-colors"
+                    >
+                        <X size={32} />
+                    </button>
+                </div>
 
-    if (!currentPrize) {
+                <div className="grid lg:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh]">
+                    {prizes.map(prize => {
+                        const prizeWinners = winners.filter(w => w.prize.id === prize.id);
+                        return (
+                            <div key={prize.id} className={`bg-gradient-to-r ${prize.color} rounded-xl p-6`}>
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="text-4xl">{prize.emoji}</div>
+                                    <div className="text-white">
+                                        <h3 className="text-xl font-bold">{prize.name}</h3>
+                                        <p className="text-sm opacity-90">
+                                            {prizeWinners.length} dari {prize.totalStock} terbagi
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                    {prizeWinners.length === 0 ? (
+                                        <p className="text-white/70 text-center py-4">Belum ada pemenang</p>
+                                    ) : (
+                                        prizeWinners.map(winner => (
+                                            <div key={winner.id} className="bg-white/20 rounded-lg p-3">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
+                                                                #{winner.winnerNumber}
+                                                            </span>
+                                                            <span className="text-white font-bold">{winner.employee.name}</span>
+                                                        </div>
+                                                        <p className="text-white/70 text-xs">ID: {winner.employee.id}</p>
+                                                    </div>
+                                                    <span className="text-white/70 text-xs">{winner.timestamp}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-white/20">
+                    <div className="grid grid-cols-3 gap-4 text-center text-white">
+                        <div>
+                            <div className="text-2xl font-bold text-yellow-400">{winners.length}</div>
+                            <div className="text-sm opacity-80">Total Pemenang</div>
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-green-400">{prizes.filter(p => p.stock === 0).length}</div>
+                            <div className="text-sm opacity-80">Hadiah Terbagi</div>
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-blue-400">{prizes.reduce((sum, p) => sum + (p.totalStock - p.stock), 0)}</div>
+                            <div className="text-sm opacity-80">Total Item Terbagi</div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+
+    // Popup Components
+    const FinishedPopup = () => (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: -50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                className="bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl p-8 max-w-md w-full text-center text-white shadow-2xl"
+            >
+                <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="text-6xl mb-4"
+                >
+                    🎉
+                </motion.div>
+                <h2 className="text-2xl font-bold mb-4">Selamat!</h2>
+                <p className="text-lg mb-6">
+                    Semua hadiah doorprize telah terbagi kepada para pemenang!<br/>
+                    Terima kasih atas partisipasi semua karyawan.
+                </p>
+                <div className="flex gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                            setShowFinishedPopup(false);
+                            setShowAllPrizes(true);
+                        }}
+                        className="flex-1 px-6 py-3 bg-white/20 rounded-lg font-bold hover:bg-white/30 transition-colors"
+                    >
+                        Lihat Semua Pemenang
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowFinishedPopup(false)}
+                        className="flex-1 px-6 py-3 bg-yellow-500 text-black rounded-lg font-bold hover:bg-yellow-400 transition-colors"
+                    >
+                        OK
+                    </motion.button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+
+    const StockFinishedPopup = () => (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-8 max-w-md w-full text-center text-white shadow-2xl"
+            >
+                <div className="text-5xl mb-4">
+                    <AlertCircle size={60} className="mx-auto text-yellow-300" />
+                </div>
+                <h2 className="text-2xl font-bold mb-4">Stok Habis!</h2>
+                <p className="text-lg mb-6">
+                    Hadiah <strong>{currentPrize?.name}</strong> sudah habis terbagi!<br/>
+                    Melanjutkan ke hadiah berikutnya...
+                </p>
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowStockFinishedPopup(false)}
+                    className="px-8 py-3 bg-yellow-500 text-black rounded-lg font-bold hover:bg-yellow-400 transition-colors"
+                >
+                    OK, Lanjut
+                </motion.button>
+            </motion.div>
+        </motion.div>
+    );
+
+    if (!currentPrize && allPrizesFinished) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 flex items-center justify-center">
                 <motion.div
@@ -252,34 +446,36 @@ const DoorprizeApp: React.FC = () => {
                     {/* Main Draw Area */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Current Prize with Stock */}
-                        <motion.div
-                            key={currentPrize.id}
-                            className={`bg-gradient-to-r ${currentPrize.color} p-6 rounded-2xl shadow-2xl relative ${currentPrize.stock === 0 ? 'opacity-60' : ''}`}
-                            whileHover={{ scale: currentPrize.stock > 0 ? 1.02 : 1 }}
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                        >
-                            {currentPrize.stock === 0 && (
-                                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                                    <div className="text-white text-2xl font-bold bg-red-600/90 px-6 py-3 rounded-lg">
-                                        HABIS
+                        {currentPrize && (
+                            <motion.div
+                                key={currentPrize.id}
+                                className={`bg-gradient-to-r ${currentPrize.color} p-6 rounded-2xl shadow-2xl relative ${currentPrize.stock === 0 ? 'opacity-60' : ''}`}
+                                whileHover={{ scale: currentPrize.stock > 0 ? 1.02 : 1 }}
+                                initial={{ opacity: 0, x: -50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                            >
+                                {currentPrize.stock === 0 && (
+                                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                                        <div className="text-white text-2xl font-bold bg-red-600/90 px-6 py-3 rounded-lg">
+                                            HABIS
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="text-center text-white">
+                                    <div className="text-6xl mb-4">{currentPrize.emoji}</div>
+                                    <h2 className="text-3xl font-bold mb-2">{currentPrize.name}</h2>
+                                    <div className="flex items-center justify-center gap-4 text-lg">
+                                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
+                                            <Package size={20} />
+                                            <span>Stok: {currentPrize.stock}</span>
+                                        </div>
+                                        <div className="bg-white/20 px-4 py-2 rounded-lg">
+                                            Pemenang: {currentPrizeWinners.length}/{currentPrize.totalStock}
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                            <div className="text-center text-white">
-                                <div className="text-6xl mb-4">{currentPrize.emoji}</div>
-                                <h2 className="text-3xl font-bold mb-2">{currentPrize.name}</h2>
-                                <div className="flex items-center justify-center gap-4 text-lg">
-                                    <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
-                                        <Package size={20} />
-                                        <span>Stok: {currentPrize.stock}</span>
-                                    </div>
-                                    <div className="bg-white/20 px-4 py-2 rounded-lg">
-                                        Pemenang: {currentPrizeWinners.length}/{currentPrize.totalStock}
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        )}
 
                         {/* Prize Navigation */}
                         {prizes.length > 1 && (
@@ -295,9 +491,9 @@ const DoorprizeApp: React.FC = () => {
                                 </motion.button>
 
                                 <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg">
-                  <span className="text-white text-sm">
-                    {currentPrizeIndex + 1} / {prizes.length}
-                  </span>
+                                    <span className="text-white text-sm">
+                                        {currentPrizeIndex + 1} / {prizes.length}
+                                    </span>
                                 </div>
 
                                 <motion.button
@@ -351,15 +547,15 @@ const DoorprizeApp: React.FC = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={startDraw}
-                                disabled={isSpinning || availableEmployees.length === 0 || currentPrize.stock === 0}
+                                disabled={isSpinning || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0}
                                 className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-xl transition-all ${
-                                    isSpinning || availableEmployees.length === 0 || currentPrize.stock === 0
+                                    isSpinning || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0
                                         ? 'bg-gray-500 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg'
                                 }`}
                             >
                                 {isSpinning ? <Pause size={24} /> : <Play size={24} />}
-                                {isSpinning ? 'Sedang Mengundi...' : currentPrize.stock === 0 ? 'Stok Habis' : 'Mulai Undian'}
+                                {isSpinning ? 'Sedang Mengundi...' : currentPrize?.stock === 0 ? 'Stok Habis' : 'Mulai Undian'}
                             </motion.button>
 
                             <motion.button
@@ -383,13 +579,13 @@ const DoorprizeApp: React.FC = () => {
                             </motion.button>
                         </div>
 
-                        {availableEmployees.length === 0 && currentPrize.stock > 0 && (
+                        {availableEmployees.length === 0 && currentPrize && currentPrize.stock > 0 && (
                             <div className="text-center text-yellow-300 bg-yellow-900/30 p-4 rounded-lg">
                                 ⚠️ Semua karyawan sudah memenangkan hadiah ini!
                             </div>
                         )}
 
-                        {currentPrize.stock === 0 && (
+                        {currentPrize && currentPrize.stock === 0 && (
                             <div className="text-center text-red-300 bg-red-900/30 p-4 rounded-lg">
                                 🚫 Stok hadiah ini sudah habis! Silakan pilih hadiah lain.
                             </div>
@@ -400,7 +596,7 @@ const DoorprizeApp: React.FC = () => {
                     <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 max-h-[600px] overflow-y-auto">
                         <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                             <Trophy className="text-yellow-400" />
-                            Pemenang {currentPrize.name}
+                            Pemenang {currentPrize?.name || 'Hadiah'}
                         </h3>
 
                         <AnimatePresence>
@@ -421,9 +617,9 @@ const DoorprizeApp: React.FC = () => {
                                                 <div className="flex-1">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <div className="flex items-center gap-2">
-                              <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
-                                #{winner.winnerNumber}
-                              </span>
+                                                            <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
+                                                                #{winner.winnerNumber}
+                                                            </span>
                                                             <h4 className="font-bold text-white">{winner.employee.name}</h4>
                                                         </div>
                                                     </div>
@@ -441,13 +637,15 @@ const DoorprizeApp: React.FC = () => {
                         </AnimatePresence>
 
                         {/* Prize Stock Info */}
-                        <div className="mt-6 pt-4 border-t border-white/20">
-                            <div className="text-sm text-purple-200">
-                                <p>Total Hadiah: {currentPrize.totalStock}</p>
-                                <p>Sudah Terbagi: {currentPrizeWinners.length}</p>
-                                <p>Sisa: {currentPrize.stock}</p>
+                        {currentPrize && (
+                            <div className="mt-6 pt-4 border-t border-white/20">
+                                <div className="text-sm text-purple-200">
+                                    <p>Total Hadiah: {currentPrize.totalStock}</p>
+                                    <p>Sudah Terbagi: {currentPrizeWinners.length}</p>
+                                    <p>Sisa: {currentPrize.stock}</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -471,6 +669,13 @@ const DoorprizeApp: React.FC = () => {
                             </motion.div>
                         </motion.div>
                     )}
+                </AnimatePresence>
+
+                {/* Popups */}
+                <AnimatePresence>
+                    {showFinishedPopup && <FinishedPopup />}
+                    {showStockFinishedPopup && <StockFinishedPopup />}
+                    {showAllPrizes && <AllWinnersModal />}
                 </AnimatePresence>
             </div>
         </div>
