@@ -144,7 +144,7 @@ class DoorprizeController extends Controller
                 'doorprize_event_id' => $currentEvent->id,
                 'winner_number' => Winner::getNextWinnerNumber($prize, $currentEvent),
                 'drawn_at' => now(),
-                'drawn_by' => auth()->user()->name ?? 'System',
+                'drawn_by' => 'System',
             ]);
 
             // Kurangi stock hadiah

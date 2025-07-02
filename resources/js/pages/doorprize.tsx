@@ -26,14 +26,8 @@ type PageProps = {
     stats: EmployeeStats
 };
 
-const DoorprizeApp: React.FC = () => {
+const Doorprize: React.FC = () => {
     const { employees, prizes: initPrizes, winners: initWinners, event, stats } = usePage<PageProps>().props;
-
-    console.log("Employees",employees);
-    console.log("Winner",initWinners);
-    console.log("Event",event);
-    console.log("Prize",initPrizes);
-    console.log("Stats",stats);
 
     const [currentEmployee, setCurrentEmployee] = useState<Employee>(employees[0]);
     const [isSpinning, setIsSpinning] = useState<boolean>(false);
@@ -63,12 +57,12 @@ const DoorprizeApp: React.FC = () => {
     // Get current prize winners
     const currentPrizeWinners = useMemo(() => {
         if (!currentPrize) return [];
-        return winners.filter(winner => winner.prize.id === currentPrize.id);
+        return winners.filter((winner) => winner.prize.id === currentPrize.id);
     }, [winners, currentPrize]);
 
     // Check if all prizes are out of stock
     const allPrizesFinished = useMemo(() => {
-        return prizes.every(prize => prize.stock === 0);
+        return prizes.every((prize) => prize.stock === 0);
     }, [prizes]);
 
     // Effect to show finished popup when all prizes are done
@@ -106,7 +100,7 @@ const DoorprizeApp: React.FC = () => {
         if (availableEmployees.length === 0) return;
         const randomEmployee = availableEmployees[Math.floor(Math.random() * availableEmployees.length)];
         setCurrentEmployee(randomEmployee);
-        setSpinCounter(prev => prev + 1);
+        setSpinCounter((prev) => prev + 1);
     }, [availableEmployees]);
 
     useEffect(() => {
@@ -136,7 +130,7 @@ const DoorprizeApp: React.FC = () => {
             // Pick final winner from available employees
             const finalWinner = availableEmployees[Math.floor(Math.random() * availableEmployees.length)];
             setCurrentEmployee(finalWinner);
-            setSpinCounter(prev => prev + 1);
+            setSpinCounter((prev) => prev + 1);
 
             setIsSpinning(false);
 
@@ -144,21 +138,17 @@ const DoorprizeApp: React.FC = () => {
                 // Call API to draw winner
                 const response = await axios.post('/doorprize/draw', {
                     prize_id: currentPrize.id,
-                    employee_id: finalWinner.id
+                    employee_id: finalWinner.id,
                 });
 
                 if (response.data.success) {
                     setShowWinner(true);
 
                     // Update winners list
-                    setWinners(prev => [response.data.winner, ...prev]);
+                    setWinners((prev) => [response.data.winner, ...prev]);
 
                     // Update prizes list with new stock
-                    setPrizes(prev => prev.map(prize =>
-                        prize.id === currentPrize.id
-                            ? { ...prize, stock: response.data.prize.stock }
-                            : prize
-                    ));
+                    setPrizes((prev) => prev.map((prize) => (prize.id === currentPrize.id ? { ...prize, stock: response.data.prize.stock } : prize)));
 
                     // Reload available employees
                     await loadAvailableEmployees();
@@ -263,22 +253,18 @@ const DoorprizeApp: React.FC = () => {
 
     if (!currentPrize && allPrizesFinished) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4 flex items-center justify-center">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center text-white"
-                >
+            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4">
+                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="text-center text-white">
                     <Trophy size={100} className="mx-auto mb-6 text-amber-400" />
-                    <h1 className="text-4xl font-bold mb-4">🎉 Semua Hadiah Telah Terbagi! 🎉</h1>
-                    <p className="text-xl mb-8 text-slate-200">Terima kasih atas partisipasi semua karyawan</p>
-                    <div className="flex gap-4 justify-center">
+                    <h1 className="mb-4 text-4xl font-bold">🎉 Semua Hadiah Telah Terbagi! 🎉</h1>
+                    <p className="mb-8 text-xl text-slate-200">Terima kasih atas partisipasi semua karyawan</p>
+                    <div className="flex justify-center gap-4">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={resetDraw}
                             disabled={isDrawing}
-                            className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 rounded-xl font-bold text-xl transition-colors disabled:opacity-50"
+                            className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-8 py-4 text-xl font-bold transition-colors hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50"
                         >
                             Mulai Ulang
                         </motion.button>
@@ -286,7 +272,7 @@ const DoorprizeApp: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={goToAllWinners}
-                            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl font-bold text-xl flex items-center gap-2 transition-colors"
+                            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-xl font-bold transition-colors hover:from-blue-700 hover:to-blue-800"
                         >
                             <ExternalLink size={24} />
                             Lihat Semua Pemenang
@@ -299,36 +285,30 @@ const DoorprizeApp: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4">
-            <div className="max-w-6xl mx-auto">
+            <div className="mx-auto max-w-6xl">
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-8"
-                >
-                    <h1 className="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
+                    <h1 className="mb-4 flex items-center justify-center gap-3 text-5xl font-bold text-white">
                         <Gift className="text-amber-400" size={50} />
                         DOORPRIZE
                         <Gift className="text-amber-400" size={50} />
                     </h1>
-                    <p className="text-xl text-slate-300 flex items-center justify-center gap-2">
+                    <p className="flex items-center justify-center gap-2 text-xl text-slate-300">
                         <Users size={24} />
                         {event.name} - {event.date}
                     </p>
-                    <p className="text-lg text-slate-400">
-                        Total {stats.totalEmployees} Karyawan Berpartisipasi
-                    </p>
-                    <div className="flex justify-center gap-4 mt-4">
+                    <p className="text-lg text-slate-400">Total {stats.totalEmployees} Karyawan Berpartisipasi</p>
+                    <div className="mt-4 flex justify-center gap-4">
                         <a
                             href="/events"
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+                            className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
                         >
                             <CalendarDays size={18} />
                             Kelola Events
                         </a>
                         <a
                             href="/prizes"
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+                            className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
                         >
                             <Gift size={18} />
                             Kelola Hadiah
@@ -336,41 +316,40 @@ const DoorprizeApp: React.FC = () => {
                     </div>
                 </motion.div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
+                <div className="grid gap-8 lg:grid-cols-3">
                     {/* Main Draw Area */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="space-y-6 lg:col-span-2">
                         {/* Current Prize with Stock */}
                         {currentPrize && (
                             <motion.div
                                 key={currentPrize.id}
-                                className={`bg-gradient-to-r ${currentPrize.color} p-6 rounded-2xl shadow-xl relative ${currentPrize.stock === 0 ? 'opacity-60' : ''}`}
+                                className={`bg-gradient-to-r ${currentPrize.color} relative rounded-2xl p-6 shadow-xl ${currentPrize.stock === 0 ? 'opacity-60' : ''}`}
                                 whileHover={{ scale: currentPrize.stock > 0 ? 1.02 : 1 }}
                                 initial={{ opacity: 0, x: -50 }}
                                 animate={{ opacity: 1, x: 0 }}
                             >
                                 {currentPrize.stock === 0 && (
-                                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
-                                        <div className="text-white text-2xl font-bold bg-red-600/90 px-6 py-3 rounded-lg">
-                                            HABIS
-                                        </div>
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/50">
+                                        <div className="rounded-lg bg-red-600/90 px-6 py-3 text-2xl font-bold text-white">HABIS</div>
                                     </div>
                                 )}
 
                                 {/* Layout: Gambar di Kiri, Info di Kanan */}
-                                <div className="flex flex-col lg:flex-row items-center gap-6 text-white">
+                                <div className="flex flex-col items-center gap-6 text-white lg:flex-row">
                                     {/* Gambar Hadiah */}
                                     <div className="flex-shrink-0">
-                                        <div className="w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
+                                        <div className="h-48 w-48 overflow-hidden rounded-2xl shadow-lg lg:h-64 lg:w-64">
                                             <img
                                                 src={currentPrize.imageUrl}
                                                 alt={currentPrize.name}
-                                                className="w-full h-full object-cover"
+                                                className="h-full w-full object-cover"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.style.display = 'none';
                                                     const parent = target.parentElement;
                                                     if (parent) {
-                                                        parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-8xl bg-white/20 rounded-2xl">🎁</div>';
+                                                        parent.innerHTML =
+                                                            '<div class="w-full h-full flex items-center justify-center text-8xl bg-white/20 rounded-2xl">🎁</div>';
                                                     }
                                                 }}
                                             />
@@ -378,16 +357,16 @@ const DoorprizeApp: React.FC = () => {
                                     </div>
 
                                     {/* Informasi Hadiah */}
-                                    <div className="flex-1 text-center lg:text-left space-y-4">
-                                        <h2 className="text-3xl lg:text-4xl font-bold">{currentPrize.name}</h2>
+                                    <div className="flex-1 space-y-4 text-center lg:text-left">
+                                        <h2 className="text-3xl font-bold lg:text-4xl">{currentPrize.name}</h2>
 
                                         {/* Stats dalam Grid */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="flex items-center justify-center lg:justify-start gap-2 bg-white/15 px-4 py-3 rounded-lg">
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div className="flex items-center justify-center gap-2 rounded-lg bg-white/15 px-4 py-3 lg:justify-start">
                                                 <Package size={24} />
                                                 <span className="text-lg font-semibold">Stok: {currentPrize.stock}</span>
                                             </div>
-                                            <div className="flex items-center justify-center lg:justify-start gap-2 bg-white/15 px-4 py-3 rounded-lg">
+                                            <div className="flex items-center justify-center gap-2 rounded-lg bg-white/15 px-4 py-3 lg:justify-start">
                                                 <Users size={24} />
                                                 <span className="text-lg font-semibold">
                                                     Tersedia: {loadingEmployees ? '...' : availableEmployees.length}
@@ -401,9 +380,9 @@ const DoorprizeApp: React.FC = () => {
                                                 <span>Progress Pemenang</span>
                                                 <span>{Math.round((currentPrizeWinners.length / currentPrize.totalStock) * 100)}%</span>
                                             </div>
-                                            <div className="w-full bg-white/20 rounded-full h-3">
+                                            <div className="h-3 w-full rounded-full bg-white/20">
                                                 <div
-                                                    className="bg-amber-400 h-3 rounded-full transition-all duration-500"
+                                                    className="h-3 rounded-full bg-amber-400 transition-all duration-500"
                                                     style={{ width: `${(currentPrizeWinners.length / currentPrize.totalStock) * 100}%` }}
                                                 ></div>
                                             </div>
@@ -415,19 +394,19 @@ const DoorprizeApp: React.FC = () => {
 
                         {/* Prize Navigation */}
                         {prizes.length > 1 && (
-                            <div className="flex justify-center items-center gap-4">
+                            <div className="flex items-center justify-center gap-4">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goToPrevPrize}
                                     disabled={isSpinning || isDrawing}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-slate-500 transition-colors"
+                                    className="flex items-center gap-2 rounded-lg bg-slate-600 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-500 disabled:opacity-50"
                                 >
                                     ← Sebelumnya
                                 </motion.button>
 
-                                <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 rounded-lg">
-                                    <span className="text-white text-sm">
+                                <div className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2">
+                                    <span className="text-sm text-white">
                                         {currentPrizeIndex + 1} / {prizes.length}
                                     </span>
                                 </div>
@@ -437,7 +416,7 @@ const DoorprizeApp: React.FC = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goToNextPrize}
                                     disabled={isSpinning || isDrawing}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-slate-500 transition-colors"
+                                    className="flex items-center gap-2 rounded-lg bg-slate-600 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-500 disabled:opacity-50"
                                 >
                                     Selanjutnya →
                                 </motion.button>
@@ -445,7 +424,7 @@ const DoorprizeApp: React.FC = () => {
                         )}
 
                         {/* Employee Display */}
-                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                        <div className="rounded-2xl border border-white/20 bg-white/10 p-8 backdrop-blur-lg">
                             <div className="text-center">
                                 <motion.div
                                     key={`${currentEmployee.id}-${spinCounter}`}
@@ -454,24 +433,26 @@ const DoorprizeApp: React.FC = () => {
                                     transition={{ duration: 0.3 }}
                                     className="space-y-4"
                                 >
-                                    <div className="text-8xl">
-                                        {isSpinning ? '🎲' : showWinner ? '🎉' : '👤'}
-                                    </div>
+                                    <div className="text-8xl">{isSpinning ? '🎲' : showWinner ? '🎉' : '👤'}</div>
                                     <div className="space-y-2">
                                         <h3 className="text-2xl font-bold text-white">
                                             {isSpinning ? 'Mengundi...' : showWinner ? 'PEMENANG!' : 'Siap Mengundi'}
                                         </h3>
                                         <motion.div
-                                            className="text-4xl font-bold text-amber-400 bg-slate-800/50 rounded-lg p-4"
-                                            animate={isSpinning ? {
-                                                scale: [1, 1.1, 1],
-                                                rotate: [0, 5, -5, 0]
-                                            } : {}}
+                                            className="rounded-lg bg-slate-800/50 p-4 text-4xl font-bold text-amber-400"
+                                            animate={
+                                                isSpinning
+                                                    ? {
+                                                          scale: [1, 1.1, 1],
+                                                          rotate: [0, 5, -5, 0],
+                                                      }
+                                                    : {}
+                                            }
                                             transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.5 }}
                                         >
                                             {currentEmployee.name}
                                         </motion.div>
-                                        <p className="text-slate-300 text-sm">ID: {currentEmployee.id}</p>
+                                        <p className="text-sm text-slate-300">ID: {currentEmployee.id}</p>
                                     </div>
                                 </motion.div>
                             </div>
@@ -483,15 +464,33 @@ const DoorprizeApp: React.FC = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={startDraw}
-                                disabled={isSpinning || isDrawing || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0 || loadingEmployees}
-                                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-xl transition-all ${
-                                    isSpinning || isDrawing || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0 || loadingEmployees
-                                        ? 'bg-gray-500 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg'
+                                disabled={
+                                    isSpinning ||
+                                    isDrawing ||
+                                    availableEmployees.length === 0 ||
+                                    !currentPrize ||
+                                    currentPrize.stock === 0 ||
+                                    loadingEmployees
+                                }
+                                className={`flex items-center gap-2 rounded-xl px-8 py-4 text-xl font-bold transition-all ${
+                                    isSpinning ||
+                                    isDrawing ||
+                                    availableEmployees.length === 0 ||
+                                    !currentPrize ||
+                                    currentPrize.stock === 0 ||
+                                    loadingEmployees
+                                        ? 'cursor-not-allowed bg-gray-500'
+                                        : 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg hover:from-emerald-700 hover:to-emerald-800'
                                 }`}
                             >
                                 {isSpinning ? <Pause size={24} /> : <Play size={24} />}
-                                {isDrawing ? 'Menyimpan...' : isSpinning ? 'Sedang Mengundi...' : currentPrize?.stock === 0 ? 'Stok Habis' : 'Mulai Undian'}
+                                {isDrawing
+                                    ? 'Menyimpan...'
+                                    : isSpinning
+                                      ? 'Sedang Mengundi...'
+                                      : currentPrize?.stock === 0
+                                        ? 'Stok Habis'
+                                        : 'Mulai Undian'}
                             </motion.button>
 
                             <motion.button
@@ -499,7 +498,7 @@ const DoorprizeApp: React.FC = () => {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={resetDraw}
                                 disabled={isDrawing}
-                                className="flex items-center gap-2 px-6 py-4 rounded-xl font-bold text-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg transition-colors disabled:opacity-50"
+                                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 text-xl font-bold text-white shadow-lg transition-colors hover:from-red-700 hover:to-red-800 disabled:opacity-50"
                             >
                                 <RotateCcw size={24} />
                                 Reset
@@ -509,7 +508,7 @@ const DoorprizeApp: React.FC = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={goToAllWinners}
-                                className="flex items-center gap-2 px-6 py-4 rounded-xl font-bold text-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg transition-colors"
+                                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-xl font-bold text-white shadow-lg transition-colors hover:from-blue-700 hover:to-blue-800"
                             >
                                 <ExternalLink size={24} />
                                 Semua Pemenang
@@ -517,34 +516,34 @@ const DoorprizeApp: React.FC = () => {
                         </div>
 
                         {availableEmployees.length === 0 && currentPrize && currentPrize.stock > 0 && !loadingEmployees && (
-                            <div className="text-center text-amber-200 bg-amber-800/30 p-4 rounded-lg border border-amber-600/30">
+                            <div className="rounded-lg border border-amber-600/30 bg-amber-800/30 p-4 text-center text-amber-200">
                                 ⚠️ Semua karyawan sudah memenangkan hadiah ini!
                             </div>
                         )}
 
                         {currentPrize && currentPrize.stock === 0 && (
-                            <div className="text-center text-red-200 bg-red-800/30 p-4 rounded-lg border border-red-600/30">
+                            <div className="rounded-lg border border-red-600/30 bg-red-800/30 p-4 text-center text-red-200">
                                 🚫 Stok hadiah ini sudah habis! Silakan pilih hadiah lain.
                             </div>
                         )}
 
                         {loadingEmployees && (
-                            <div className="text-center text-blue-200 bg-blue-800/30 p-4 rounded-lg border border-blue-600/30">
+                            <div className="rounded-lg border border-blue-600/30 bg-blue-800/30 p-4 text-center text-blue-200">
                                 ⏳ Memuat data karyawan yang tersedia...
                             </div>
                         )}
                     </div>
 
                     {/* Current Prize Winners */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 max-h-[600px] overflow-y-auto">
-                        <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                    <div className="max-h-[600px] overflow-y-auto rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-lg">
+                        <h3 className="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
                             <Trophy className="text-amber-400" />
                             Pemenang {currentPrize?.name || 'Hadiah'}
                         </h3>
 
                         <AnimatePresence>
                             {currentPrizeWinners.length === 0 ? (
-                                <p className="text-slate-300 text-center py-8">Belum ada pemenang untuk hadiah ini</p>
+                                <p className="py-8 text-center text-slate-300">Belum ada pemenang untuk hadiah ini</p>
                             ) : (
                                 <div className="space-y-3">
                                     {currentPrizeWinners.map((winner) => (
@@ -553,28 +552,29 @@ const DoorprizeApp: React.FC = () => {
                                             initial={{ opacity: 0, x: 50 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -50 }}
-                                            className="bg-white/15 rounded-lg p-4 border border-white/20"
+                                            className="rounded-lg border border-white/20 bg-white/15 p-4"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                                <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
                                                     <img
                                                         src={winner.prize.imageUrl}
                                                         alt={winner.prize.name}
-                                                        className="w-full h-full object-cover"
+                                                        className="h-full w-full object-cover"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             target.style.display = 'none';
                                                             const parent = target.parentElement;
                                                             if (parent) {
-                                                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl bg-white/20 rounded-lg">🎁</div>';
+                                                                parent.innerHTML =
+                                                                    '<div class="w-full h-full flex items-center justify-center text-2xl bg-white/20 rounded-lg">🎁</div>';
                                                             }
                                                         }}
                                                     />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <div className="flex items-center justify-between mb-1">
+                                                    <div className="mb-1 flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="bg-amber-500 text-slate-900 text-xs px-2 py-1 rounded font-bold">
+                                                            <span className="rounded bg-amber-500 px-2 py-1 text-xs font-bold text-slate-900">
                                                                 #{winner.winnerNumber}
                                                             </span>
                                                             <h4 className="font-black text-white">{winner.employee.name}</h4>
@@ -595,7 +595,7 @@ const DoorprizeApp: React.FC = () => {
 
                         {/* Prize Stock Info */}
                         {currentPrize && (
-                            <div className="mt-6 pt-4 border-t border-white/20">
+                            <div className="mt-6 border-t border-white/20 pt-4">
                                 <div className="text-sm text-slate-300">
                                     <p>Total Hadiah: {currentPrize.totalStock}</p>
                                     <p>Sudah Terbagi: {currentPrizeWinners.length}</p>
@@ -609,7 +609,9 @@ const DoorprizeApp: React.FC = () => {
                 {/* Popups */}
                 <AnimatePresence>
                     {showFinishedPopup && <FinishedPopup setShowAllPrizes={setShowAllPrizes} setShowFinishedPopup={setShowFinishedPopup} />}
-                    {showStockFinishedPopup && <StockFinishedPopup currentPrize={currentPrize} setShowStockFinishedPopup={setShowStockFinishedPopup} />}
+                    {showStockFinishedPopup && (
+                        <StockFinishedPopup currentPrize={currentPrize} setShowStockFinishedPopup={setShowStockFinishedPopup} />
+                    )}
                     {showAllPrizes && <AllWinnersModal prizes={prizes} winners={winners} setShowAllPrizes={setShowAllPrizes} />}
                 </AnimatePresence>
             </div>
@@ -617,4 +619,4 @@ const DoorprizeApp: React.FC = () => {
     );
 };
 
-export default DoorprizeApp;
+export default Doorprize;
