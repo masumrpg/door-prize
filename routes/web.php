@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('door-prize');
+    return Inertia::render('doorprize');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
