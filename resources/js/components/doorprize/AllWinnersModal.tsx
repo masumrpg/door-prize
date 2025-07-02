@@ -34,7 +34,7 @@ const AllWinnersModal = ({ prizes, winners, setShowAllPrizes }: AllWinnersModalP
                     return (
                         <div key={prize.id} className={`bg-gradient-to-r ${prize.color} rounded-xl p-6`}>
                             <div className="mb-4 flex items-center gap-4">
-                                <div className="text-4xl">{prize.emoji}</div>
+                                <div className="text-4xl">{prize.imageUrl}</div>
                                 <div className="text-white">
                                     <h3 className="text-xl font-bold">{prize.name}</h3>
                                     <p className="text-sm opacity-90">

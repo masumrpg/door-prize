@@ -7,7 +7,7 @@ export interface Employee {
 export interface Prize {
     id: string;
     name: string;
-    emoji: string;
+    imageUrl: string;
     color: string;
     stock: number;
     totalStock: number;
