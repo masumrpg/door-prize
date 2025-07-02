@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Activity, Award, Calendar, Clock, Gift, TrendingUp, Trophy, Users } from 'lucide-react';
 
 // Mock data - replace with your actual props from Laravel
@@ -56,6 +56,16 @@ const mockData = {
     ],
 };
 
+interface PageProps {
+    currentEvent?: {
+        id: number;
+        name: string;
+        description: string;
+        status: string;
+        eventDate: string;
+    }
+}
+
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'active':
@@ -92,6 +102,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function DoorprizeDashboard() {
+    const {currentEvent:cEvent} = usePage<PageProps>().props;
+    console.log(cEvent);
     const { currentEvent, stats, prizes, recentWinners, events } = mockData;
 
     const participationRate = ((stats.totalWinners / stats.totalEmployees) * 100).toFixed(1);

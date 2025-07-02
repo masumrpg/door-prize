@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoorprizeController;
 use App\Http\Controllers\DoorprizeEventController;
 use App\Http\Controllers\PrizeController;
@@ -12,9 +13,8 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::resource('dashboard', DashboardController::class)->only(['index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Doorprize Events CRUD
     Route::resource('events', DoorprizeEventController::class);

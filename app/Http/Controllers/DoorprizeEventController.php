@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DoorprizeEvent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class DoorprizeEventController extends Controller
 {
@@ -16,7 +14,7 @@ class DoorprizeEventController extends Controller
     public function index()
     {
         $events = DoorprizeEvent::orderBy('event_date', 'desc')->get();
-        
+
         return Inertia::render('event/Index', [
             'events' => $events
         ]);
@@ -93,12 +91,12 @@ class DoorprizeEventController extends Controller
         if ($event->winners()->count() > 0) {
             return redirect()->route('events.index')->with('error', 'Cannot delete event with winners.');
         }
-        
+
         $event->delete();
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
     }
-    
+
     /**
      * Set event as active
      */
@@ -106,20 +104,20 @@ class DoorprizeEventController extends Controller
     {
         // Set all events to draft first
         DoorprizeEvent::where('status', 'active')->update(['status' => 'draft']);
-        
+
         // Set this event as active
         $event->update(['status' => 'active']);
-        
+
         return redirect()->route('events.index')->with('success', 'Event set as active.');
     }
-    
+
     /**
      * Set event as completed
      */
     public function setCompleted(DoorprizeEvent $event)
     {
         $event->update(['status' => 'completed']);
-        
+
         return redirect()->route('events.index')->with('success', 'Event marked as completed.');
     }
 }
