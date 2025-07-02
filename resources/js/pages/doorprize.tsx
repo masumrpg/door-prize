@@ -6,99 +6,24 @@ import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
+import { usePage } from '@inertiajs/react';
 
-// Generate 1400 sample employees
-const generateEmployees = (): Employee[] => {
-    const names: string[] = [
-        'Ahmad', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fira', 'Gilang', 'Hani', 'Indra', 'Joko',
-        'Kartika', 'Lisa', 'Masum', 'Nita', 'Oscar', 'Putri', 'Qori', 'Rian', 'Sari', 'Tono',
-        'Ulfa', 'Vina', 'Wati', 'Xena', 'Yanto', 'Zara', 'Adi', 'Bella', 'Candra', 'Dina'
-    ];
-
-    const employees: Employee[] = [];
-    for (let i = 1; i <= 1400; i++) {
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        employees.push({
-            id: `emp_${i}_${Math.random().toString(36).substr(2, 9)}`,
-            name: `${randomName} ${i}`
-        });
-    }
-    return employees;
+type PageProps = {
+    employees: Employee[];
+    prizes: Prize[];
+    winners:  Winner[];
 };
 
-const initialPrizes: Prize[] = [
-    {
-        id: 'kulkas',
-        name: 'Kulkas 2 Pintu',
-        imageUrl: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=300&h=300&fit=crop&crop=center',
-        color: 'from-blue-600 to-blue-700',
-        stock: 5,
-        totalStock: 5
-    },
-    {
-        id: 'tv',
-        name: 'Smart TV 55"',
-        imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&h=300&fit=crop&crop=center',
-        color: 'from-indigo-600 to-indigo-700',
-        stock: 3,
-        totalStock: 3
-    },
-    {
-        id: 'iphone',
-        name: 'iPhone 15 Pro',
-        imageUrl: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop&crop=center',
-        color: 'from-slate-700 to-slate-800',
-        stock: 2,
-        totalStock: 2
-    },
-    {
-        id: 'macbook',
-        name: 'MacBook Air M3',
-        imageUrl: 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300&h=300&fit=crop&crop=center',
-        color: 'from-purple-600 to-purple-700',
-        stock: 1,
-        totalStock: 1
-    },
-    {
-        id: 'watch',
-        name: 'Apple Watch Series 9',
-        imageUrl: 'https://images.unsplash.com/photo-1551816230-ef5deaed4a26?w=300&h=300&fit=crop&crop=center',
-        color: 'from-emerald-600 to-emerald-700',
-        stock: 4,
-        totalStock: 4
-    },
-    {
-        id: 'voucher',
-        name: 'Voucher Belanja 5 Juta',
-        imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop&crop=center',
-        color: 'from-amber-600 to-amber-700',
-        stock: 10,
-        totalStock: 10
-    },
-    {
-        id: 'sepeda',
-        name: 'Sepeda Gunung',
-        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop&crop=center',
-        color: 'from-teal-600 to-teal-700',
-        stock: 2,
-        totalStock: 2
-    },
-    {
-        id: 'airpods',
-        name: 'AirPods Pro',
-        imageUrl: 'https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?w=300&h=300&fit=crop&crop=center',
-        color: 'from-rose-600 to-rose-700',
-        stock: 6,
-        totalStock: 6
-    }
-];
 
 const DoorprizeApp: React.FC = () => {
-    const [employees] = useState<Employee[]>(generateEmployees());
+    const {employees, prizes: initPrizes, winners: pemenang} = usePage<PageProps>().props;
+    console.log(pemenang);
+
+
     const [currentEmployee, setCurrentEmployee] = useState<Employee>(employees[0]);
     const [isSpinning, setIsSpinning] = useState<boolean>(false);
     const [winners, setWinners] = useState<Winner[]>([]);
-    const [prizes, setPrizes] = useState<Prize[]>(initialPrizes);
+    const [prizes, setPrizes] = useState<Prize[]>(initPrizes);
     const [currentPrizeIndex, setCurrentPrizeIndex] = useState<number>(0);
     const [showWinner, setShowWinner] = useState<boolean>(false);
     const [speed, setSpeed] = useState<number>(50);
@@ -219,7 +144,7 @@ const DoorprizeApp: React.FC = () => {
         setIsSpinning(false);
         setShowWinner(false);
         setWinners([]);
-        setPrizes(initialPrizes);
+        setPrizes(initPrizes);
         setCurrentPrizeIndex(0);
         setCurrentEmployee(employees[0]);
         setSpinCounter(0);
