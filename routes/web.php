@@ -52,11 +52,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Reset event
         Route::post('/reset', [DoorprizeController::class, 'reset'])->name('reset');
     });
-    
-    // Winners page
-    Route::get('/doorprize/winners', function () {
-        return Inertia::render('doorprize/winners');
-    })->name('doorprize.winners');
 });
 
 require __DIR__.'/settings.php';

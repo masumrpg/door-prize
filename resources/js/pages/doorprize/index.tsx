@@ -5,7 +5,7 @@ import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
-import { usePage, router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 
 interface EmployeeStats {
@@ -23,7 +23,7 @@ type PageProps = {
         name: string;
         date: string;
     };
-    stats: EmployeeStats;
+    stats: EmployeeStats
 };
 
 const Doorprize: React.FC = () => {
@@ -43,6 +43,7 @@ const Doorprize: React.FC = () => {
     const [showFinishedPopup, setShowFinishedPopup] = useState<boolean>(false);
     const [showAllPrizes, setShowAllPrizes] = useState<boolean>(false);
     const [showStockFinishedPopup, setShowStockFinishedPopup] = useState<boolean>(false);
+
 
     // Available employees for current prize
     const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
@@ -64,6 +65,13 @@ const Doorprize: React.FC = () => {
     const allPrizesFinished = useMemo(() => {
         return prizes.every((prize) => prize.stock === 0);
     }, [prizes]);
+
+    // Effect to show finished popup when all prizes are done
+    // useEffect(() => {
+    //     if (allPrizesFinished && winners.length > 0 && !showFinishedPopup) {
+    //         setShowFinishedPopup(true);
+    //     }
+    // }, [allPrizesFinished, winners.length, showFinishedPopup]);
 
     // Load available employees when prize changes
     useEffect(() => {
@@ -232,7 +240,6 @@ const Doorprize: React.FC = () => {
                 alert('Kesalahan tidak diketahui');
             }
         }
-        router.reload();
     }, [isDrawing, initPrizes, employees, loadAvailableEmployees]);
 
     const loadAllWinners = useCallback(async () => {
