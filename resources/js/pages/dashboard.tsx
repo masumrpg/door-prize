@@ -56,7 +56,7 @@ const mockData = {
     ],
 };
 
-const getStatusColor = (status) => {
+const getStatusColor = (status: string) => {
     switch (status) {
         case 'active':
             return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -69,7 +69,7 @@ const getStatusColor = (status) => {
     }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | number | Date) => {
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -77,7 +77,7 @@ const formatDate = (dateString) => {
     });
 };
 
-const formatTime = (timestamp) => {
+const formatTime = (timestamp: string | number | Date) => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
