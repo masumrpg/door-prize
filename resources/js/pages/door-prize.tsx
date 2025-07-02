@@ -202,15 +202,6 @@ const DoorprizeApp: React.FC = () => {
                     setTimeout(() => {
                         setShowStockFinishedPopup(true);
                     }, 2000);
-
-                    // Move to next available prize if current is exhausted
-                    const nextAvailablePrizes = prizes.filter(p => p.id !== currentPrize.id && p.stock > 0);
-                    if (nextAvailablePrizes.length > 0) {
-                        const nextIndex = prizes.findIndex(p => p.id === nextAvailablePrizes[0].id);
-                        setTimeout(() => {
-                            setCurrentPrizeIndex(nextIndex);
-                        }, 3000);
-                    }
                 }
             }
         }, 5000);
@@ -317,37 +308,64 @@ const DoorprizeApp: React.FC = () => {
                                 animate={{ opacity: 1, x: 0 }}
                             >
                                 {currentPrize.stock === 0 && (
-                                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
                                         <div className="text-white text-2xl font-bold bg-red-600/90 px-6 py-3 rounded-lg">
                                             HABIS
                                         </div>
                                     </div>
                                 )}
-                                <div className="text-center text-white">
-                                    <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
-                                        <img
-                                            src={currentPrize.imageUrl}
-                                            alt={currentPrize.name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                // Fallback ke emoji jika gambar gagal load
-                                                const target = e.target as HTMLImageElement;
-                                                target.style.display = 'none';
-                                                const parent = target.parentElement;
-                                                if (parent) {
-                                                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-6xl bg-white/20 rounded-2xl">🎁</div>';
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                    <h2 className="text-3xl font-bold mb-2">{currentPrize.name}</h2>
-                                    <div className="flex items-center justify-center gap-4 text-lg">
-                                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
-                                            <Package size={20} />
-                                            <span>Stok: {currentPrize.stock}</span>
+
+                                {/* Layout Baru: Gambar di Kiri, Info di Kanan */}
+                                <div className="flex flex-col lg:flex-row items-center gap-6 text-white">
+                                    {/* Gambar Hadiah - Lebih Besar */}
+                                    <div className="flex-shrink-0">
+                                        <div className="w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
+                                            <img
+                                                src={currentPrize.imageUrl}
+                                                alt={currentPrize.name}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    // Fallback ke emoji jika gambar gagal load
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-8xl bg-white/20 rounded-2xl">🎁</div>';
+                                                    }
+                                                }}
+                                            />
                                         </div>
-                                        <div className="bg-white/20 px-4 py-2 rounded-lg">
-                                            Pemenang: {currentPrizeWinners.length}/{currentPrize.totalStock}
+                                    </div>
+
+                                    {/* Informasi Hadiah */}
+                                    <div className="flex-1 text-center lg:text-left space-y-4">
+                                        <h2 className="text-3xl lg:text-4xl font-bold">{currentPrize.name}</h2>
+
+                                        {/* Stats dalam Grid */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="flex items-center justify-center lg:justify-start gap-2 bg-white/20 px-4 py-3 rounded-lg">
+                                                <Package size={24} />
+                                                <span className="text-lg font-semibold">Stok: {currentPrize.stock}</span>
+                                            </div>
+                                            <div className="flex items-center justify-center lg:justify-start gap-2 bg-white/20 px-4 py-3 rounded-lg">
+                            <span className="text-lg font-semibold">
+                                Pemenang: {currentPrizeWinners.length}/{currentPrize.totalStock}
+                            </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress Bar untuk Pemenang */}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span>Progress Pemenang</span>
+                                                <span>{Math.round((currentPrizeWinners.length / currentPrize.totalStock) * 100)}%</span>
+                                            </div>
+                                            <div className="w-full bg-white/20 rounded-full h-3">
+                                                <div
+                                                    className="bg-yellow-400 h-3 rounded-full transition-all duration-500"
+                                                    style={{ width: `${(currentPrizeWinners.length / currentPrize.totalStock) * 100}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -368,9 +386,9 @@ const DoorprizeApp: React.FC = () => {
                                 </motion.button>
 
                                 <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg">
-                                    <span className="text-white text-sm">
-                                        {currentPrizeIndex + 1} / {prizes.length}
-                                    </span>
+                <span className="text-white text-sm">
+                    {currentPrizeIndex + 1} / {prizes.length}
+                </span>
                                 </div>
 
                                 <motion.button
