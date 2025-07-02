@@ -4,9 +4,9 @@ use App\Http\Controllers\DoorprizeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('doorprize');
-})->name('home');
+//Route::get('/', function () {
+//    return Inertia::render('doorprize');
+//})->name('home');
 
 // Main doorprize page
 Route::get('/doorprize', [DoorprizeController::class, 'index'])->name('doorprize.index');
