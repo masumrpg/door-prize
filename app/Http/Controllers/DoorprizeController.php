@@ -19,7 +19,7 @@ class DoorprizeController extends Controller
         $currentEvent = DoorprizeEvent::active()->first();
 
         if (!$currentEvent) {
-            return Inertia::render('Doorprize/NoActiveEvent');
+            return Inertia::render('doorprize/error');
         }
 
         $prizes = Prize::active()
@@ -60,14 +60,6 @@ class DoorprizeController extends Controller
                 ];
             });
 
-        // Count
-        $currentEvent = DoorprizeEvent::active()->first();
-
-        // Error handling
-//        if (!$currentEvent) {
-//            return response()->json(['error' => 'No active event found'], 400);
-//        }
-
         // Ambil semua employee yang aktif
         $totalEmployees = Employee::active()->count();
 
@@ -92,7 +84,7 @@ class DoorprizeController extends Controller
                 ];
             });
 
-        return Inertia::render('doorprize', [
+        return Inertia::render('doorprize/index', [
             'employees' => $availableEmployees,
             'prizes' => $prizes,
             'winners' => $winners,

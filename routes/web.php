@@ -15,22 +15,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-    
+
     // Doorprize Events CRUD
     Route::resource('events', DoorprizeEventController::class);
     Route::post('events/{event}/set-active', [DoorprizeEventController::class, 'setActive'])->name('events.set-active');
     Route::post('events/{event}/set-completed', [DoorprizeEventController::class, 'setCompleted'])->name('events.set-completed');
-    
+
     // Prizes CRUD
     Route::resource('prizes', PrizeController::class);
     Route::post('prizes/{prize}/toggle-active', [PrizeController::class, 'toggleActive'])->name('prizes.toggle-active');
     Route::post('prizes/sort-order', [PrizeController::class, 'updateSortOrder'])->name('prizes.sort-order');
 
-    // Main doorprize page
-    Route::get('/doorprize', [DoorprizeController::class, 'index'])->name('doorprize.index');
 
+    Route::resource('doorprize', DoorprizeController::class)->only(['index', 'draw', 'getAvailableEmployees', 'reset', 'getPrizeWinners', 'getAllWinners']);
     // API routes untuk doorprize
     Route::prefix('doorprize')->name('doorprize.')->group(function () {
+
+        // Main doorprize page
+        Route::get('/doorprize', [DoorprizeController::class, 'index'])->name('doorprize.index');
 
         // Draw a winner
         Route::post('/draw', [DoorprizeController::class, 'draw'])->name('draw');

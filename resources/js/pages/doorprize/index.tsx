@@ -44,6 +44,7 @@ const Doorprize: React.FC = () => {
     const [showAllPrizes, setShowAllPrizes] = useState<boolean>(false);
     const [showStockFinishedPopup, setShowStockFinishedPopup] = useState<boolean>(false);
 
+
     // Available employees for current prize
     const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
     const [loadingEmployees, setLoadingEmployees] = useState<boolean>(false);
@@ -66,11 +67,11 @@ const Doorprize: React.FC = () => {
     }, [prizes]);
 
     // Effect to show finished popup when all prizes are done
-    useEffect(() => {
-        if (allPrizesFinished && winners.length > 0 && !showFinishedPopup) {
-            setShowFinishedPopup(true);
-        }
-    }, [allPrizesFinished, winners.length, showFinishedPopup]);
+    // useEffect(() => {
+    //     if (allPrizesFinished && winners.length > 0 && !showFinishedPopup) {
+    //         setShowFinishedPopup(true);
+    //     }
+    // }, [allPrizesFinished, winners.length, showFinishedPopup]);
 
     // Load available employees when prize changes
     useEffect(() => {
@@ -158,6 +159,23 @@ const Doorprize: React.FC = () => {
                         setTimeout(() => {
                             setShowStockFinishedPopup(true);
                         }, 2000);
+                    }
+
+                    if (response.data.prize.stock === 0) {
+                        // Cek apakah ini hadiah terakhir yang habis
+                        const updatedPrizes = prizes.map((p) => (p.id === currentPrize.id ? { ...p, stock: response.data.prize.stock } : p));
+
+                        const isLastPrizeFinished = updatedPrizes.every((p) => p.stock === 0);
+
+                        if (isLastPrizeFinished) {
+                            setTimeout(() => {
+                                setShowFinishedPopup(true);
+                            }, 2000);
+                        } else {
+                            setTimeout(() => {
+                                setShowStockFinishedPopup(true);
+                            }, 2000);
+                        }
                     }
                 } else {
                     alert('Gagal melakukan undian: ' + response.data.error);
