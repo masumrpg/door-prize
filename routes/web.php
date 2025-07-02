@@ -20,6 +20,9 @@ Route::prefix('doorprize')->name('doorprize.')->group(function () {
     // Get available employees for a specific prize
     Route::get('/available-employees', [DoorprizeController::class, 'getAvailableEmployees'])->name('available-employees');
 
+    // Test get
+    Route::get('/available-em', [DoorprizeController::class, 'get'])->name('available-em');
+
     // Get winners for specific prize
     Route::get('/prize-winners', [DoorprizeController::class, 'getPrizeWinners'])->name('prize-winners');
 

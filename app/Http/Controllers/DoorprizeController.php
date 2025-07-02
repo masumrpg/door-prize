@@ -6,6 +6,7 @@ use App\Models\DoorprizeEvent;
 use App\Models\Employee;
 use App\Models\Prize;
 use App\Models\Winner;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -20,13 +21,6 @@ class DoorprizeController extends Controller
         if (!$currentEvent) {
             return Inertia::render('Doorprize/NoActiveEvent');
         }
-
-        $employees = Employee::active()->get()->map(function ($employee) {
-            return [
-                'id' => $employee->employee_id,
-                'name' => $employee->name,
-            ];
-        });
 
         $prizes = Prize::active()
             ->orderBy('sort_order')
@@ -66,8 +60,40 @@ class DoorprizeController extends Controller
                 ];
             });
 
+        // Count
+        $currentEvent = DoorprizeEvent::active()->first();
+
+        // Error handling
+//        if (!$currentEvent) {
+//            return response()->json(['error' => 'No active event found'], 400);
+//        }
+
+        // Ambil semua employee yang aktif
+        $totalEmployees = Employee::active()->count();
+
+        // Ambil employee yang sudah menang (unique) untuk event ini
+        $totalWinners = Winner::with('employee')
+            ->forEvent($currentEvent)
+            ->distinct('employee_id')
+            ->count();
+
+        // Ambil daftar employee yang belum menang sama sekali
+        $winnerEmployeeIds = Winner::forEvent($currentEvent)
+            ->distinct('employee_id')
+            ->pluck('employee_id');
+
+        $availableEmployees = Employee::whereNotIn('id', $winnerEmployeeIds)
+            ->active()
+            ->get()
+            ->map(function ($employee) {
+                return [
+                    'id' => $employee->employee_id,
+                    'name' => $employee->name,
+                ];
+            });
+
         return Inertia::render('doorprize', [
-            'employees' => $employees,
+            'employees' => $availableEmployees,
             'prizes' => $prizes,
             'winners' => $winners,
             'event' => [
@@ -75,6 +101,11 @@ class DoorprizeController extends Controller
                 'name' => $currentEvent->name,
                 'date' => $currentEvent->event_date->format('Y-m-d'),
             ],
+            'stats' => [
+                'totalEmployees' => $totalEmployees,
+                'totalWinners' => $totalWinners,
+                'availableCount' => $totalEmployees - $totalWinners,
+            ]
         ]);
     }
 
@@ -159,16 +190,30 @@ class DoorprizeController extends Controller
         }
     }
 
-    public function getAvailableEmployees(Request $request)
+    public function getAvailableEmployees(): JsonResponse
     {
-        $request->validate([
-            'prize_id' => 'required|exists:prizes,id',
-        ]);
-
         $currentEvent = DoorprizeEvent::active()->first();
-        $prize = Prize::findOrFail($request->prize_id);
 
-        $availableEmployees = Employee::availableForPrize($prize, $currentEvent)
+        if (!$currentEvent) {
+            return response()->json(['error' => 'No active event found'], 400);
+        }
+
+        // Ambil semua employee yang aktif
+        $totalEmployees = Employee::active()->count();
+
+        // Ambil employee yang sudah menang (unique) untuk event ini
+        $totalWinners = Winner::with('employee')
+            ->forEvent($currentEvent)
+            ->distinct('employee_id')
+            ->count();
+
+        // Ambil daftar employee yang belum menang sama sekali
+        $winnerEmployeeIds = Winner::forEvent($currentEvent)
+            ->distinct('employee_id')
+            ->pluck('employee_id');
+
+        $availableEmployees = Employee::whereNotIn('id', $winnerEmployeeIds)
+            ->active()
             ->get()
             ->map(function ($employee) {
                 return [
@@ -179,7 +224,9 @@ class DoorprizeController extends Controller
 
         return response()->json([
             'employees' => $availableEmployees,
-            'count' => $availableEmployees->count(),
+            'totalEmployees' => $totalEmployees,
+            'totalWinners' => $totalWinners,
+            'availableCount' => $totalEmployees - $totalWinners,
         ]);
     }
 

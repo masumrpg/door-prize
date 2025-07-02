@@ -8,6 +8,12 @@ import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 
+interface EmployeeStats {
+    totalEmployees: number;
+    totalWinners: number;
+    availableCount: number;
+}
+
 type PageProps = {
     employees: Employee[];
     prizes: Prize[];
@@ -17,14 +23,17 @@ type PageProps = {
         name: string;
         date: string;
     };
+    stats: EmployeeStats
 };
 
 const DoorprizeApp: React.FC = () => {
-    const { employees, prizes: initPrizes, winners: initWinners, event } = usePage<PageProps>().props;
+    const { employees, prizes: initPrizes, winners: initWinners, event, stats } = usePage<PageProps>().props;
 
+    console.log("Employees",employees);
     console.log("Winner",initWinners);
     console.log("Event",event);
     console.log("Prize",initPrizes);
+    console.log("Stats",stats);
 
     const [currentEmployee, setCurrentEmployee] = useState<Employee>(employees[0]);
     const [isSpinning, setIsSpinning] = useState<boolean>(false);
@@ -82,11 +91,7 @@ const DoorprizeApp: React.FC = () => {
 
         setLoadingEmployees(true);
         try {
-            const response = await axios.get('/doorprize/available-employees', {
-                params: {
-                    prize_id: currentPrize.id
-                }
-            });
+            const response = await axios.get('/doorprize/available-employees');
             setAvailableEmployees(response.data.employees);
         } catch (error) {
             console.error('Error loading available employees:', error);
@@ -303,7 +308,7 @@ const DoorprizeApp: React.FC = () => {
                 >
                     <h1 className="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
                         <Gift className="text-amber-400" size={50} />
-                        DOORPRIZE KARYAWAN
+                        DOORPRIZE
                         <Gift className="text-amber-400" size={50} />
                     </h1>
                     <p className="text-xl text-slate-300 flex items-center justify-center gap-2">
@@ -311,7 +316,7 @@ const DoorprizeApp: React.FC = () => {
                         {event.name} - {event.date}
                     </p>
                     <p className="text-lg text-slate-400">
-                        Total {employees.length} Karyawan Berpartisipasi
+                        Total {stats.totalEmployees} Karyawan Berpartisipasi
                     </p>
                 </motion.div>
 
