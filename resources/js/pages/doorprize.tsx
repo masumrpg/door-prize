@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package } from 'lucide-react';
@@ -7,32 +6,44 @@ import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 
 type PageProps = {
     employees: Employee[];
     prizes: Prize[];
-    winners:  Winner[];
+    winners: Winner[];
+    event: {
+        id: number;
+        name: string;
+        date: string;
+    };
 };
 
-
 const DoorprizeApp: React.FC = () => {
-    const {employees, prizes: initPrizes, winners: pemenang} = usePage<PageProps>().props;
-    console.log(pemenang);
+    const { employees, prizes: initPrizes, winners: initWinners, event } = usePage<PageProps>().props;
 
+    console.log("Winner",initWinners);
+    console.log("Event",event);
+    console.log("Prize",initPrizes);
 
     const [currentEmployee, setCurrentEmployee] = useState<Employee>(employees[0]);
     const [isSpinning, setIsSpinning] = useState<boolean>(false);
-    const [winners, setWinners] = useState<Winner[]>([]);
+    const [winners, setWinners] = useState<Winner[]>(initWinners);
     const [prizes, setPrizes] = useState<Prize[]>(initPrizes);
     const [currentPrizeIndex, setCurrentPrizeIndex] = useState<number>(0);
     const [showWinner, setShowWinner] = useState<boolean>(false);
     const [speed, setSpeed] = useState<number>(50);
     const [spinCounter, setSpinCounter] = useState<number>(0);
+    const [isDrawing, setIsDrawing] = useState<boolean>(false);
 
     // New states for popups and all prizes view
     const [showFinishedPopup, setShowFinishedPopup] = useState<boolean>(false);
     const [showAllPrizes, setShowAllPrizes] = useState<boolean>(false);
     const [showStockFinishedPopup, setShowStockFinishedPopup] = useState<boolean>(false);
+
+    // Available employees for current prize
+    const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
+    const [loadingEmployees, setLoadingEmployees] = useState<boolean>(false);
 
     // Get current prize (show all prizes, not just available ones)
     const currentPrize = useMemo(() => {
@@ -46,13 +57,6 @@ const DoorprizeApp: React.FC = () => {
         return winners.filter(winner => winner.prize.id === currentPrize.id);
     }, [winners, currentPrize]);
 
-    // Available employees (not yet won current prize)
-    const availableEmployees = useMemo(() => {
-        if (!currentPrize) return [];
-        const currentPrizeWinnerIds = currentPrizeWinners.map(w => w.employee.id);
-        return employees.filter(emp => !currentPrizeWinnerIds.includes(emp.id));
-    }, [employees, currentPrizeWinners, currentPrize]);
-
     // Check if all prizes are out of stock
     const allPrizesFinished = useMemo(() => {
         return prizes.every(prize => prize.stock === 0);
@@ -64,6 +68,33 @@ const DoorprizeApp: React.FC = () => {
             setShowFinishedPopup(true);
         }
     }, [allPrizesFinished, winners.length, showFinishedPopup]);
+
+    // Load available employees when prize changes
+    useEffect(() => {
+        if (currentPrize) {
+            loadAvailableEmployees();
+        }
+    }, [currentPrize]);
+
+    // Function to load available employees from API
+    const loadAvailableEmployees = useCallback(async () => {
+        if (!currentPrize) return;
+
+        setLoadingEmployees(true);
+        try {
+            const response = await axios.get('/doorprize/available-employees', {
+                params: {
+                    prize_id: currentPrize.id
+                }
+            });
+            setAvailableEmployees(response.data.employees);
+        } catch (error) {
+            console.error('Error loading available employees:', error);
+            setAvailableEmployees([]);
+        } finally {
+            setLoadingEmployees(false);
+        }
+    }, [currentPrize]);
 
     // Spinning effect with useCallback to prevent re-renders
     const spinEmployee = useCallback(() => {
@@ -83,10 +114,11 @@ const DoorprizeApp: React.FC = () => {
         };
     }, [isSpinning, speed, spinEmployee]);
 
-    const startDraw = useCallback(() => {
-        if (isSpinning || !currentPrize || currentPrize.stock === 0 || availableEmployees.length === 0) return;
+    const startDraw = useCallback(async () => {
+        if (isSpinning || isDrawing || !currentPrize || currentPrize.stock === 0 || availableEmployees.length === 0) return;
 
         setIsSpinning(true);
+        setIsDrawing(true);
         setShowWinner(false);
         setSpeed(50);
 
@@ -94,41 +126,58 @@ const DoorprizeApp: React.FC = () => {
         const timer1 = setTimeout(() => setSpeed(100), 2000);
         const timer2 = setTimeout(() => setSpeed(200), 3000);
         const timer3 = setTimeout(() => setSpeed(400), 4000);
-        const timer4 = setTimeout(() => {
+
+        const timer4 = setTimeout(async () => {
             // Pick final winner from available employees
             const finalWinner = availableEmployees[Math.floor(Math.random() * availableEmployees.length)];
             setCurrentEmployee(finalWinner);
             setSpinCounter(prev => prev + 1);
 
             setIsSpinning(false);
-            setShowWinner(true);
 
-            if (currentPrize) {
-                // Add winner to list using the final winner
-                const winnerNumber = currentPrize.totalStock - currentPrize.stock + 1;
-                const newWinner: Winner = {
-                    id: `winner_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                    employee: finalWinner,
-                    prize: { ...currentPrize },
-                    timestamp: new Date().toLocaleTimeString('id-ID'),
-                    winnerNumber
-                };
+            try {
+                // Call API to draw winner
+                const response = await axios.post('/doorprize/draw', {
+                    prize_id: currentPrize.id,
+                    employee_id: finalWinner.id
+                });
 
-                setWinners(prev => [newWinner, ...prev]);
+                if (response.data.success) {
+                    setShowWinner(true);
 
-                // Update prize stock
-                setPrizes(prev => prev.map(prize =>
-                    prize.id === currentPrize.id
-                        ? { ...prize, stock: prize.stock - 1 }
-                        : prize
-                ));
+                    // Update winners list
+                    setWinners(prev => [response.data.winner, ...prev]);
 
-                // Check if current prize stock is finished
-                if (currentPrize.stock === 1) {
-                    setTimeout(() => {
-                        setShowStockFinishedPopup(true);
-                    }, 2000);
+                    // Update prizes list with new stock
+                    setPrizes(prev => prev.map(prize =>
+                        prize.id === currentPrize.id
+                            ? { ...prize, stock: response.data.prize.stock }
+                            : prize
+                    ));
+
+                    // Reload available employees
+                    await loadAvailableEmployees();
+
+                    // Check if current prize stock is finished
+                    if (response.data.prize.stock === 0) {
+                        setTimeout(() => {
+                            setShowStockFinishedPopup(true);
+                        }, 2000);
+                    }
+                } else {
+                    alert('Gagal melakukan undian: ' + response.data.error);
                 }
+            } catch (error: unknown) {
+                console.error('Error drawing winner:', error);
+                if (axios.isAxiosError(error)) {
+                    alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+                } else if (error instanceof Error) {
+                    alert('Terjadi kesalahan umum: ' + error.message);
+                } else {
+                    alert('Kesalahan tidak diketahui');
+                }
+            } finally {
+                setIsDrawing(false);
             }
         }, 5000);
 
@@ -138,33 +187,74 @@ const DoorprizeApp: React.FC = () => {
             clearTimeout(timer3);
             clearTimeout(timer4);
         };
-    }, [isSpinning, currentPrize, availableEmployees, prizes]);
+    }, [isSpinning, isDrawing, currentPrize, availableEmployees, loadAvailableEmployees]);
 
-    const resetDraw = useCallback(() => {
-        setIsSpinning(false);
-        setShowWinner(false);
-        setWinners([]);
-        setPrizes(initPrizes);
-        setCurrentPrizeIndex(0);
-        setCurrentEmployee(employees[0]);
-        setSpinCounter(0);
-        setShowFinishedPopup(false);
-        setShowStockFinishedPopup(false);
-    }, [employees]);
+    const resetDraw = useCallback(async () => {
+        if (isDrawing) return;
 
-    const goToAllWinners = useCallback(() => {
-        setShowAllPrizes(true);
+        const confirmed = confirm('Apakah Anda yakin ingin mereset semua data undian? Semua pemenang akan dihapus!');
+        if (!confirmed) return;
+
+        try {
+            const response = await axios.post('/doorprize/reset');
+
+            if (response.data.success) {
+                // Reset all states
+                setIsSpinning(false);
+                setShowWinner(false);
+                setWinners([]);
+                setPrizes(initPrizes);
+                setCurrentPrizeIndex(0);
+                setCurrentEmployee(employees[0]);
+                setSpinCounter(0);
+                setShowFinishedPopup(false);
+                setShowStockFinishedPopup(false);
+
+                // Reload available employees
+                await loadAvailableEmployees();
+
+                alert('Data undian berhasil direset!');
+            } else {
+                alert('Gagal mereset data: ' + response.data.error);
+            }
+        } catch (error: unknown) {
+            console.error('Error resetting draw:', error);
+            if (axios.isAxiosError(error)) {
+                alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+            } else if (error instanceof Error) {
+                alert('Terjadi kesalahan umum: ' + error.message);
+            } else {
+                alert('Kesalahan tidak diketahui');
+            }
+        }
+    }, [isDrawing, initPrizes, employees, loadAvailableEmployees]);
+
+    const loadAllWinners = useCallback(async () => {
+        try {
+            const response = await axios.get('/doorprize/winners');
+            setWinners(response.data.winners);
+            setPrizes(response.data.prizes);
+        } catch (error) {
+            console.error('Error loading all winners:', error);
+        }
     }, []);
 
+    const goToAllWinners = useCallback(async () => {
+        await loadAllWinners();
+        setShowAllPrizes(true);
+    }, [loadAllWinners]);
+
     const goToPrevPrize = useCallback(() => {
+        if (isSpinning || isDrawing) return;
         const prevIndex = currentPrizeIndex === 0 ? prizes.length - 1 : currentPrizeIndex - 1;
         setCurrentPrizeIndex(prevIndex);
-    }, [currentPrizeIndex, prizes.length]);
+    }, [currentPrizeIndex, prizes.length, isSpinning, isDrawing]);
 
     const goToNextPrize = useCallback(() => {
+        if (isSpinning || isDrawing) return;
         const nextIndex = (currentPrizeIndex + 1) % prizes.length;
         setCurrentPrizeIndex(nextIndex);
-    }, [currentPrizeIndex, prizes.length]);
+    }, [currentPrizeIndex, prizes.length, isSpinning, isDrawing]);
 
     if (!currentPrize && allPrizesFinished) {
         return (
@@ -182,7 +272,8 @@ const DoorprizeApp: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={resetDraw}
-                            className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 rounded-xl font-bold text-xl transition-colors"
+                            disabled={isDrawing}
+                            className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 rounded-xl font-bold text-xl transition-colors disabled:opacity-50"
                         >
                             Mulai Ulang
                         </motion.button>
@@ -217,6 +308,9 @@ const DoorprizeApp: React.FC = () => {
                     </h1>
                     <p className="text-xl text-slate-300 flex items-center justify-center gap-2">
                         <Users size={24} />
+                        {event.name} - {event.date}
+                    </p>
+                    <p className="text-lg text-slate-400">
                         Total {employees.length} Karyawan Berpartisipasi
                     </p>
                 </motion.div>
@@ -273,8 +367,9 @@ const DoorprizeApp: React.FC = () => {
                                                 <span className="text-lg font-semibold">Stok: {currentPrize.stock}</span>
                                             </div>
                                             <div className="flex items-center justify-center lg:justify-start gap-2 bg-white/15 px-4 py-3 rounded-lg">
+                                                <Users size={24} />
                                                 <span className="text-lg font-semibold">
-                                                    Pemenang: {currentPrizeWinners.length}/{currentPrize.totalStock}
+                                                    Tersedia: {loadingEmployees ? '...' : availableEmployees.length}
                                                 </span>
                                             </div>
                                         </div>
@@ -304,7 +399,7 @@ const DoorprizeApp: React.FC = () => {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goToPrevPrize}
-                                    disabled={isSpinning}
+                                    disabled={isSpinning || isDrawing}
                                     className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-slate-500 transition-colors"
                                 >
                                     ← Sebelumnya
@@ -320,7 +415,7 @@ const DoorprizeApp: React.FC = () => {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goToNextPrize}
-                                    disabled={isSpinning}
+                                    disabled={isSpinning || isDrawing}
                                     className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-slate-500 transition-colors"
                                 >
                                     Selanjutnya →
@@ -367,22 +462,23 @@ const DoorprizeApp: React.FC = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={startDraw}
-                                disabled={isSpinning || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0}
+                                disabled={isSpinning || isDrawing || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0 || loadingEmployees}
                                 className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-xl transition-all ${
-                                    isSpinning || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0
+                                    isSpinning || isDrawing || availableEmployees.length === 0 || !currentPrize || currentPrize.stock === 0 || loadingEmployees
                                         ? 'bg-gray-500 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg'
                                 }`}
                             >
                                 {isSpinning ? <Pause size={24} /> : <Play size={24} />}
-                                {isSpinning ? 'Sedang Mengundi...' : currentPrize?.stock === 0 ? 'Stok Habis' : 'Mulai Undian'}
+                                {isDrawing ? 'Menyimpan...' : isSpinning ? 'Sedang Mengundi...' : currentPrize?.stock === 0 ? 'Stok Habis' : 'Mulai Undian'}
                             </motion.button>
 
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={resetDraw}
-                                className="flex items-center gap-2 px-6 py-4 rounded-xl font-bold text-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg transition-colors"
+                                disabled={isDrawing}
+                                className="flex items-center gap-2 px-6 py-4 rounded-xl font-bold text-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg transition-colors disabled:opacity-50"
                             >
                                 <RotateCcw size={24} />
                                 Reset
@@ -399,7 +495,7 @@ const DoorprizeApp: React.FC = () => {
                             </motion.button>
                         </div>
 
-                        {availableEmployees.length === 0 && currentPrize && currentPrize.stock > 0 && (
+                        {availableEmployees.length === 0 && currentPrize && currentPrize.stock > 0 && !loadingEmployees && (
                             <div className="text-center text-amber-200 bg-amber-800/30 p-4 rounded-lg border border-amber-600/30">
                                 ⚠️ Semua karyawan sudah memenangkan hadiah ini!
                             </div>
@@ -408,6 +504,12 @@ const DoorprizeApp: React.FC = () => {
                         {currentPrize && currentPrize.stock === 0 && (
                             <div className="text-center text-red-200 bg-red-800/30 p-4 rounded-lg border border-red-600/30">
                                 🚫 Stok hadiah ini sudah habis! Silakan pilih hadiah lain.
+                            </div>
+                        )}
+
+                        {loadingEmployees && (
+                            <div className="text-center text-blue-200 bg-blue-800/30 p-4 rounded-lg border border-blue-600/30">
+                                ⏳ Memuat data karyawan yang tersedia...
                             </div>
                         )}
                     </div>
