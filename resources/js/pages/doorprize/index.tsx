@@ -7,7 +7,6 @@ import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 import { usePage, router } from '@inertiajs/react';
 import axios from 'axios';
-import { toast, Toaster } from 'sonner';
 
 interface EmployeeStats {
     totalEmployees: number;
@@ -171,16 +170,16 @@ const Doorprize: React.FC = () => {
                         }
                     }
                 } else {
-                    toast.error('Gagal melakukan undian: ' + response.data.error);
+                    alert('Gagal melakukan undian: ' + response.data.error);
                 }
             } catch (error: unknown) {
                 console.error('Error drawing winner:', error);
                 if (axios.isAxiosError(error)) {
-                    toast.error('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+                    alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
                 } else if (error instanceof Error) {
-                    toast.error('Terjadi kesalahan umum: ' + error.message);
+                    alert('Terjadi kesalahan umum: ' + error.message);
                 } else {
-                    toast.error('Kesalahan tidak diketahui');
+                    alert('Kesalahan tidak diketahui');
                 }
             } finally {
                 setIsDrawing(false);
@@ -219,18 +218,18 @@ const Doorprize: React.FC = () => {
                 // Reload available employees
                 await loadAvailableEmployees();
 
-                toast.success('Data undian berhasil direset!');
+                alert('Data undian berhasil direset!');
             } else {
-                toast.error('Gagal mereset data: ' + response.data.error);
+                alert('Gagal mereset data: ' + response.data.error);
             }
         } catch (error: unknown) {
             console.error('Error resetting draw:', error);
             if (axios.isAxiosError(error)) {
-                toast.error('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+                alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
             } else if (error instanceof Error) {
-                toast.error('Terjadi kesalahan umum: ' + error.message);
+                alert('Terjadi kesalahan umum: ' + error.message);
             } else {
-                toast.error('Kesalahan tidak diketahui');
+                alert('Kesalahan tidak diketahui');
             }
         }
         router.reload();
@@ -626,7 +625,6 @@ const Doorprize: React.FC = () => {
                     )}
                     {showAllPrizes && <AllWinnersModal prizes={prizes} winners={winners} setShowAllPrizes={setShowAllPrizes} />}
                 </AnimatePresence>
-                <Toaster richColors position="top-right" />
             </div>
         </div>
     );
