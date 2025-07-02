@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package } from 'lucide-react';
+import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, CalendarDays } from 'lucide-react';
 import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
@@ -318,6 +318,22 @@ const DoorprizeApp: React.FC = () => {
                     <p className="text-lg text-slate-400">
                         Total {stats.totalEmployees} Karyawan Berpartisipasi
                     </p>
+                    <div className="flex justify-center gap-4 mt-4">
+                        <a
+                            href="/events"
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+                        >
+                            <CalendarDays size={18} />
+                            Kelola Events
+                        </a>
+                        <a
+                            href="/prizes"
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+                        >
+                            <Gift size={18} />
+                            Kelola Hadiah
+                        </a>
+                    </div>
                 </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
