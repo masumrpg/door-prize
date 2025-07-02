@@ -408,7 +408,7 @@ const DoorprizeApp: React.FC = () => {
                             <div className="text-center">
                                 <motion.div
                                     key={`${currentEmployee.id}-${spinCounter}`}
-                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    initial={{ scale: 0.8, opacity: 0.8 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ duration: 0.3 }}
                                     className="space-y-4"
