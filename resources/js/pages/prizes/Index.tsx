@@ -63,158 +63,158 @@ export default function PrizeIndex({ prizes }: Props) {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Prizes" />
-      <div className="p-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">Prizes</CardTitle>
-              <CardDescription>
-                Manage doorprize items for your events.
-              </CardDescription>
-            </div>
-            <Button asChild>
-              <Link href="/prizes/create">
-                <Plus className="mr-2 h-4 w-4" /> Add Prize
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {prizes.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                  <Gift className="h-8 w-8 text-gray-500" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No prizes yet</h3>
-                <p className="text-gray-500 mb-4">Get started by adding your first prize.</p>
-                <Button asChild>
-                  <Link href="/prizes/create">
-                    <Plus className="mr-2 h-4 w-4" /> Add Prize
-                  </Link>
-                </Button>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {prizes.map((prize) => (
-                    <TableRow key={prize.id}>
-                      <TableCell>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-gray-100">
-                          {prize.image_url ? (
-                            <img
-                              src={prize.image_url}
-                              alt={prize.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎁</div>';
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="text-2xl">🎁</div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{prize.name}</div>
-                        {prize.description && (
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {prize.description}
+      <AppLayout breadcrumbs={breadcrumbs}>
+          <Head title="Hadiah" />
+          <div className="p-4">
+              <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                          <CardTitle className="text-2xl">Hadiah</CardTitle>
+                          <CardDescription>
+                              Kelola item doorprize untuk acara Anda.
+                          </CardDescription>
+                      </div>
+                      <Button asChild>
+                          <Link href="/prizes/create">
+                              <Plus className="mr-2 h-4 w-4" /> Tambah Hadiah
+                          </Link>
+                      </Button>
+                  </CardHeader>
+                  <CardContent>
+                      {prizes.length === 0 ? (
+                          <div className="text-center py-8">
+                              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                                  <Gift className="h-8 w-8 text-gray-500" />
+                              </div>
+                              <h3 className="text-lg font-medium mb-2">Belum ada hadiah</h3>
+                              <p className="text-gray-500 mb-4">Mulai dengan menambahkan hadiah pertama Anda.</p>
+                              <Button asChild>
+                                  <Link href="/prizes/create">
+                                      <Plus className="mr-2 h-4 w-4" /> Tambah Hadiah
+                                  </Link>
+                              </Button>
                           </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{prize.remaining_stock} / {prize.total_stock}</span>
-                          <span className="text-xs text-gray-500">remaining</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleActive(prize)}
-                          className={prize.is_active ? 'text-green-600' : 'text-gray-500'}
-                        >
-                          {prize.is_active ? (
-                            <>
-                              <ToggleRight className="mr-2 h-4 w-4" />
-                              Active
-                            </>
-                          ) : (
-                            <>
-                              <ToggleLeft className="mr-2 h-4 w-4" />
-                              Inactive
-                            </>
-                          )}
-                        </Button>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="ghost" size="icon" asChild>
-                            <Link href={`/prizes/${prize.id}/edit`}>
-                              <Edit className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => confirmDelete(prize)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                      ) : (
+                          <Table>
+                              <TableHeader>
+                                  <TableRow>
+                                      <TableHead>Gambar</TableHead>
+                                      <TableHead>Nama</TableHead>
+                                      <TableHead>Stok</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead className="text-right">Aksi</TableHead>
+                                  </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                  {prizes.map((prize) => (
+                                      <TableRow key={prize.id}>
+                                          <TableCell>
+                                              <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-gray-100">
+                                                  {prize.image_url ? (
+                                                      <img
+                                                          src={prize.image_url}
+                                                          alt={prize.name}
+                                                          className="w-full h-full object-cover"
+                                                          onError={(e) => {
+                                                              const target = e.target as HTMLImageElement;
+                                                              target.style.display = 'none';
+                                                              const parent = target.parentElement;
+                                                              if (parent) {
+                                                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎁</div>';
+                                                              }
+                                                          }}
+                                                      />
+                                                  ) : (
+                                                      <div className="text-2xl">🎁</div>
+                                                  )}
+                                              </div>
+                                          </TableCell>
+                                          <TableCell>
+                                              <div className="font-medium">{prize.name}</div>
+                                              {prize.description && (
+                                                  <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                      {prize.description}
+                                                  </div>
+                                              )}
+                                          </TableCell>
+                                          <TableCell>
+                                              <div className="flex flex-col">
+                                                  <span className="font-medium">{prize.remaining_stock} / {prize.total_stock}</span>
+                                                  <span className="text-xs text-gray-500">tersisa</span>
+                                              </div>
+                                          </TableCell>
+                                          <TableCell>
+                                              <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => toggleActive(prize)}
+                                                  className={prize.is_active ? 'text-green-600' : 'text-gray-500'}
+                                              >
+                                                  {prize.is_active ? (
+                                                      <>
+                                                          <ToggleRight className="mr-2 h-4 w-4" />
+                                                          Aktif
+                                                      </>
+                                                  ) : (
+                                                      <>
+                                                          <ToggleLeft className="mr-2 h-4 w-4" />
+                                                          Tidak Aktif
+                                                      </>
+                                                  )}
+                                              </Button>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                              <div className="flex justify-end space-x-2">
+                                                  <Button variant="ghost" size="icon" asChild>
+                                                      <Link href={`/prizes/${prize.id}/edit`}>
+                                                          <Edit className="h-4 w-4" />
+                                                          <span className="sr-only">Edit</span>
+                                                      </Link>
+                                                  </Button>
+                                                  <Button
+                                                      variant="ghost"
+                                                      size="icon"
+                                                      onClick={() => confirmDelete(prize)}
+                                                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                  >
+                                                      <Trash2 className="h-4 w-4" />
+                                                      <span className="sr-only">Hapus</span>
+                                                  </Button>
+                                              </div>
+                                          </TableCell>
+                                      </TableRow>
+                                  ))}
+                              </TableBody>
+                          </Table>
+                      )}
+                  </CardContent>
+              </Card>
+          </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Prize</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{prizeToDelete?.name}"? This action cannot be undone.
-              {prizeToDelete && prizeToDelete.total_stock !== prizeToDelete.remaining_stock && (
-                <div className="mt-2 p-2 bg-yellow-50 text-yellow-800 rounded-md">
-                  Warning: This prize has been awarded to winners. Deleting it may affect historical data.
-                </div>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete Prize
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </AppLayout>
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogContent>
+                  <DialogHeader>
+                      <DialogTitle>Hapus Hadiah</DialogTitle>
+                      <DialogDescription>
+                          Apakah Anda yakin ingin menghapus "{prizeToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.
+                          {prizeToDelete && prizeToDelete.total_stock !== prizeToDelete.remaining_stock && (
+                              <div className="mt-2 p-2 bg-yellow-50 text-yellow-800 rounded-md">
+                                  Peringatan: Hadiah ini telah diberikan kepada pemenang. Menghapusnya dapat mempengaruhi data historis.
+                              </div>
+                          )}
+                      </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                      <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                          Batal
+                      </Button>
+                      <Button variant="destructive" onClick={handleDelete}>
+                          Hapus Hadiah
+                      </Button>
+                  </DialogFooter>
+              </DialogContent>
+          </Dialog>
+      </AppLayout>
   );
 }

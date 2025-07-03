@@ -49,17 +49,29 @@ const getStatusColor = (status: string) => {
 };
 
 const formatDate = (dateString: string | number | Date) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
     });
 };
 
+const getStatusText = (status: string) => {
+    switch (status) {
+        case 'active':
+            return 'Aktif';
+        case 'completed':
+            return 'Selesai';
+        case 'draft':
+            return 'Draf';
+        default:
+            return status;
+    }
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Dasbor',
         href: '/dashboard',
     },
 ];
@@ -83,23 +95,23 @@ export default function DoorprizeDashboard() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title="Dasbor" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Doorprize Dashboard</h1>
-                            <p className="mt-1 text-gray-600 dark:text-gray-400">Manage your doorprize events and track winners</p>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dasbor Doorprize</h1>
+                            <p className="mt-1 text-gray-600 dark:text-gray-400">Kelola acara doorprize dan lacak pemenang</p>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" className="flex items-center gap-2">
+                            <Button variant="outline" className="flex items-center gap-2 hover:cursor-pointer" onClick={()=> router.visit('/events')}>
                                 <Calendar className="h-4 w-4" />
-                                View Events
+                                Lihat Acara
                             </Button>
-                            <Button className="flex items-center gap-2">
+                            <Button className="flex items-center gap-2 hover:cursor-pointer" onClick={()=> router.visit('/doorprize')}>
                                 <Gift className="h-4 w-4" />
-                                Start Drawing
+                                Mulai Undian
                             </Button>
                         </div>
                     </div>
@@ -111,10 +123,10 @@ export default function DoorprizeDashboard() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Activity className="h-5 w-5 text-blue-500" />
-                                        <CardTitle className="text-lg">Current Active Event</CardTitle>
+                                        <CardTitle className="text-lg">Acara Aktif Saat Ini</CardTitle>
                                     </div>
                                     <Badge className={getStatusColor(currentEvent.status)}>
-                                        {currentEvent.status.charAt(0).toUpperCase() + currentEvent.status.slice(1)}
+                                        {getStatusText(currentEvent.status)}
                                     </Badge>
                                 </div>
                                 <CardDescription className="text-xl font-semibold text-gray-900 dark:text-white">{currentEvent.name}</CardDescription>
@@ -122,7 +134,7 @@ export default function DoorprizeDashboard() {
                             <CardContent>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                     <Calendar className="h-4 w-4" />
-                                    <span>Event Date: {formatDate(currentEvent.eventDate)}</span>
+                                    <span>Tanggal Acara: {formatDate(currentEvent.eventDate)}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -132,46 +144,46 @@ export default function DoorprizeDashboard() {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+                                <CardTitle className="text-sm font-medium">Total Karyawan</CardTitle>
                                 <Users className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-                                <p className="text-xs text-muted-foreground">Eligible participants</p>
+                                <p className="text-xs text-muted-foreground">Peserta yang memenuhi syarat</p>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Winners</CardTitle>
+                                <CardTitle className="text-sm font-medium">Total Pemenang</CardTitle>
                                 <Trophy className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.totalWinners}</div>
-                                <p className="text-xs text-muted-foreground">{participationRate}% participation rate</p>
+                                <p className="text-xs text-muted-foreground">Tingkat partisipasi {participationRate}%</p>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Available Participants</CardTitle>
+                                <CardTitle className="text-sm font-medium">Peserta Tersedia</CardTitle>
                                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.availableCount}</div>
-                                <p className="text-xs text-muted-foreground">Haven't won any prize yet</p>
+                                <p className="text-xs text-muted-foreground">Belum memenangkan hadiah apapun</p>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Prizes Awarded</CardTitle>
+                                <CardTitle className="text-sm font-medium">Hadiah Diberikan</CardTitle>
                                 <Award className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{totalPrizesAwarded}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    Out of {prizes.reduce((sum, prize) => sum + prize.totalStock, 0)} total prizes
+                                    Dari {prizes.reduce((sum, prize) => sum + prize.totalStock, 0)} total hadiah
                                 </p>
                             </CardContent>
                         </Card>
@@ -184,9 +196,9 @@ export default function DoorprizeDashboard() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Gift className="h-5 w-5" />
-                                    Prize Stock Status
+                                    Status Stok Hadiah
                                 </CardTitle>
-                                <CardDescription>Current availability of all prizes</CardDescription>
+                                <CardDescription>Ketersediaan semua hadiah saat ini</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -194,12 +206,12 @@ export default function DoorprizeDashboard() {
                                         <div key={prize.id} className="flex items-center justify-between rounded-lg border p-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
-                                                    <img src={prize.imageUrl} alt="image" className={'h-full w-full object-cover'} />
+                                                    <img src={prize.imageUrl} alt="gambar" className={'h-full w-full object-cover'} />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{prize.name}</p>
                                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                        {prize.stock} of {prize.totalStock} remaining
+                                                        {prize.stock} dari {prize.totalStock} tersisa
                                                     </p>
                                                 </div>
                                             </div>
@@ -213,7 +225,7 @@ export default function DoorprizeDashboard() {
                                                     />
                                                 </div>
                                                 <Badge variant={prize.stock > 0 ? 'secondary' : 'destructive'}>
-                                                    {prize.stock > 0 ? 'Available' : 'Sold Out'}
+                                                    {prize.stock > 0 ? 'Tersedia' : 'Habis'}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -227,9 +239,9 @@ export default function DoorprizeDashboard() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Clock className="h-5 w-5" />
-                                    Recent Winners
+                                    Pemenang Terbaru
                                 </CardTitle>
-                                <CardDescription>Latest prize drawings</CardDescription>
+                                <CardDescription>Undian hadiah terbaru</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
