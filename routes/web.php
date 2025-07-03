@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoorprizeController;
 use App\Http\Controllers\DoorprizeEventController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PrizeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -13,8 +14,12 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard
     Route::resource('dashboard', DashboardController::class)->only(['index']);
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Employee routes
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
 
     // Doorprize Events CRUD
     Route::resource('events', DoorprizeEventController::class);
