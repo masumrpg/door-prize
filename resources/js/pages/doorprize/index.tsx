@@ -5,7 +5,7 @@ import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { toast, Toaster } from 'sonner';
 
@@ -24,7 +24,7 @@ type PageProps = {
         name: string;
         date: string;
     };
-    stats: EmployeeStats
+    stats: EmployeeStats;
 };
 
 const Doorprize: React.FC = () => {
@@ -44,7 +44,6 @@ const Doorprize: React.FC = () => {
     const [showFinishedPopup, setShowFinishedPopup] = useState<boolean>(false);
     const [showAllPrizes, setShowAllPrizes] = useState<boolean>(false);
     const [showStockFinishedPopup, setShowStockFinishedPopup] = useState<boolean>(false);
-
 
     // Available employees for current prize
     const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
@@ -180,14 +179,14 @@ const Doorprize: React.FC = () => {
                     }
                 } else {
                     console.error('Gagal melakukan undian: ' + response.data.error);
-                    toast.error("Gagal melakukan undian", response.data.error);
+                    toast.error('Gagal melakukan undian', response.data.error);
                 }
             } catch (error: unknown) {
                 console.error('Error drawing winner:', error);
                 if (axios.isAxiosError(error)) {
                     toast.error('Terjadi kesalahan', error.response?.data?.error || error);
                 } else if (error instanceof Error) {
-                    toast.error('Terjadi kesalahan umum :' + error.message)
+                    toast.error('Terjadi kesalahan umum :' + error.message);
                 } else {
                     toast.error('Kesalahan tidak diketahui');
                 }
@@ -205,59 +204,12 @@ const Doorprize: React.FC = () => {
     }, [isSpinning, isDrawing, currentPrize, availableEmployees, loadAvailableEmployees]);
 
     const resetDraw = useCallback(async () => {
-        if (isDrawing) return;
-
-        const confirmed = confirm('Apakah Anda yakin ingin mereset semua data undian? Semua pemenang akan dihapus!');
-        if (!confirmed) return;
-
-        try {
-            const response = await axios.post('/doorprize/reset');
-
-            if (response.data.success) {
-                // Reset all states
-                setIsSpinning(false);
-                setShowWinner(false);
-                setWinners([]);
-                setPrizes(initPrizes);
-                setCurrentPrizeIndex(0);
-                setCurrentEmployee(employees[0]);
-                setSpinCounter(0);
-                setShowFinishedPopup(false);
-                setShowStockFinishedPopup(false);
-
-                // Reload available employees
-                await loadAvailableEmployees();
-
-                toast.success('Data undian berhasil direset!');
-            } else {
-                toast.error('Gagal mereset data: ' + response.data.error)
-            }
-        } catch (error: unknown) {
-            console.error('Error resetting draw:', error);
-            if (axios.isAxiosError(error)) {
-                toast.error('Terjadi kesalahan: ' + (error.response?.data?.error || error.message))
-            } else if (error instanceof Error) {
-                toast.error('Terjadi kesalahan umum: ' + error.message)
-            } else {
-                toast.error('Kesalahan tidak diketahui')
-            }
-        }
-    }, [isDrawing, initPrizes, employees, loadAvailableEmployees]);
-
-    const loadAllWinners = useCallback(async () => {
-        try {
-            const response = await axios.get('/doorprize/winners');
-            setWinners(response.data.winners);
-            setPrizes(response.data.prizes);
-        } catch (error) {
-            console.error('Error loading all winners:', error);
-        }
+        router.visit('/prizes');
     }, []);
 
     const goToAllWinners = useCallback(async () => {
-        await loadAllWinners();
-        setShowAllPrizes(true);
-    }, [loadAllWinners]);
+        router.visit('/dashboard');
+    }, []);
 
     const goToPrevPrize = useCallback(() => {
         if (isSpinning || isDrawing) return;
@@ -276,7 +228,7 @@ const Doorprize: React.FC = () => {
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4">
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="text-center text-white">
                     <Trophy size={100} className="mx-auto mb-6 text-amber-400" />
-                    <h1 className="mb-4 text-4xl font-bold">🎉 Semua Hadiah Telah Terbagi! 🎉</h1>
+                    <h1 className="mb-4 text-4xl font-bold">🎉 Semua Hadiah Telah Terbagi! atau Belum Bikin Hadiah! 🎉</h1>
                     <p className="mb-8 text-xl text-slate-200">Terima kasih atas partisipasi semua karyawan</p>
                     <div className="flex justify-center gap-4">
                         <motion.button
@@ -286,7 +238,7 @@ const Doorprize: React.FC = () => {
                             disabled={isDrawing}
                             className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-8 py-4 text-xl font-bold transition-colors hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50"
                         >
-                            Mulai Ulang
+                            Ke Hadiah
                         </motion.button>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -295,7 +247,7 @@ const Doorprize: React.FC = () => {
                             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-xl font-bold transition-colors hover:from-blue-700 hover:to-blue-800"
                         >
                             <ExternalLink size={24} />
-                            Lihat Semua Pemenang
+                            Ke Dashboard
                         </motion.button>
                     </div>
                 </motion.div>
