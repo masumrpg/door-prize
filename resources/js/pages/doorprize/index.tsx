@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, CalendarDays } from 'lucide-react';
+import { Gift, Play, Pause, RotateCcw, Trophy, Users, ExternalLink, Package, CalendarDays, Home } from 'lucide-react';
 import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { toast, Toaster } from 'sonner';
 
@@ -204,12 +204,59 @@ const Doorprize: React.FC = () => {
     }, [isSpinning, isDrawing, currentPrize, availableEmployees, loadAvailableEmployees]);
 
     const resetDraw = useCallback(async () => {
-        router.visit('/prizes');
+        if (isDrawing) return;
+
+        const confirmed = confirm('Apakah Anda yakin ingin mereset semua data undian? Semua pemenang akan dihapus!');
+        if (!confirmed) return;
+
+        try {
+            const response = await axios.post('/doorprize/reset');
+
+            if (response.data.success) {
+                // Reset all states
+                setIsSpinning(false);
+                setShowWinner(false);
+                setWinners([]);
+                setPrizes(initPrizes);
+                setCurrentPrizeIndex(0);
+                setCurrentEmployee(employees[0]);
+                setSpinCounter(0);
+                setShowFinishedPopup(false);
+                setShowStockFinishedPopup(false);
+
+                // Reload available employees
+                await loadAvailableEmployees();
+
+                toast.success('Data undian berhasil direset!');
+            } else {
+                toast.error('Gagal mereset data: ' + response.data.error);
+            }
+        } catch (error: unknown) {
+            console.error('Error resetting draw:', error);
+            if (axios.isAxiosError(error)) {
+                toast.error('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+            } else if (error instanceof Error) {
+                toast.error('Terjadi kesalahan umum: ' + error.message);
+            } else {
+                toast.error('Kesalahan tidak diketahui');
+            }
+        }
+    }, [isDrawing, initPrizes, employees, loadAvailableEmployees]);
+
+    const loadAllWinners = useCallback(async () => {
+        try {
+            const response = await axios.get('/doorprize/winners');
+            setWinners(response.data.winners);
+            setPrizes(response.data.prizes);
+        } catch (error) {
+            console.error('Error loading all winners:', error);
+        }
     }, []);
 
     const goToAllWinners = useCallback(async () => {
-        router.visit('/dashboard');
-    }, []);
+        await loadAllWinners();
+        setShowAllPrizes(true);
+    }, [loadAllWinners]);
 
     const goToPrevPrize = useCallback(() => {
         if (isSpinning || isDrawing) return;
@@ -271,6 +318,13 @@ const Doorprize: React.FC = () => {
                     </p>
                     <p className="text-lg text-slate-400">Total {stats.totalEmployees} Karyawan Berpartisipasi</p>
                     <div className="mt-4 flex justify-center gap-4">
+                        <a
+                            href="/dashboard"
+                            className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
+                        >
+                            <Home size={18} />
+                            Dashboard
+                        </a>
                         <a
                             href="/events"
                             className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"

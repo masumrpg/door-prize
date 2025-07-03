@@ -105,13 +105,17 @@ export default function DoorprizeDashboard() {
                             <p className="mt-1 text-gray-600 dark:text-gray-400">Kelola acara doorprize dan lacak pemenang</p>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" className="flex items-center gap-2 hover:cursor-pointer" onClick={()=> router.visit('/events')}>
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-2 hover:cursor-pointer"
+                                onClick={() => router.visit('/events')}
+                            >
                                 <Calendar className="h-4 w-4" />
                                 Lihat Acara
                             </Button>
-                            <Button className="flex items-center gap-2 hover:cursor-pointer" onClick={()=> router.visit('/doorprize')}>
+                            <Button className="flex items-center gap-2 hover:cursor-pointer" onClick={() => router.visit('/doorprize')}>
                                 <Gift className="h-4 w-4" />
-                                Mulai Undian
+                                Undian
                             </Button>
                         </div>
                     </div>
@@ -125,9 +129,7 @@ export default function DoorprizeDashboard() {
                                         <Activity className="h-5 w-5 text-blue-500" />
                                         <CardTitle className="text-lg">Acara Aktif Saat Ini</CardTitle>
                                     </div>
-                                    <Badge className={getStatusColor(currentEvent.status)}>
-                                        {getStatusText(currentEvent.status)}
-                                    </Badge>
+                                    <Badge className={getStatusColor(currentEvent.status)}>{getStatusText(currentEvent.status)}</Badge>
                                 </div>
                                 <CardDescription className="text-xl font-semibold text-gray-900 dark:text-white">{currentEvent.name}</CardDescription>
                             </CardHeader>
@@ -218,7 +220,7 @@ export default function DoorprizeDashboard() {
                                             <div className="flex items-center gap-2">
                                                 <div className="h-2 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
                                                     <div
-                                                        className={`h-2 rounded-full transition-all duration-300 bg-primary`}
+                                                        className={`h-2 rounded-full bg-primary transition-all duration-300`}
                                                         style={{
                                                             width: `${(prize.stock / prize.totalStock) * 100}%`,
                                                         }}
