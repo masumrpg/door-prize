@@ -308,12 +308,12 @@ const Doorprize: React.FC = () => {
                 <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
                     <h1 className="mb-4 flex items-center justify-center gap-3 text-5xl font-bold text-white">
                         <Gift className="text-amber-400" size={50} />
-                        DOORPRIZE
+                        {event.name.toLocaleUpperCase()}
                         <Gift className="text-amber-400" size={50} />
                     </h1>
                     <p className="flex items-center justify-center gap-2 text-xl text-slate-300">
                         <Users size={24} />
-                        {event.name} - {event.date}
+                        {event.date}
                     </p>
                     <p className="text-lg text-slate-400">Total {stats.totalEmployees} Karyawan Berpartisipasi</p>
                     <div className="mt-4 flex justify-center gap-4">
