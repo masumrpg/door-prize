@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { FinishedPopupProps } from '@/interface';
-import { router } from '@inertiajs/react';
 
 // Popup Components
 const FinishedPopup = ({ setShowFinishedPopup, setShowAllPrizes }: FinishedPopupProps) => (
@@ -36,17 +35,6 @@ const FinishedPopup = ({ setShowFinishedPopup, setShowAllPrizes }: FinishedPopup
                     className="flex-1 rounded-lg bg-white/20 px-6 py-3 font-bold transition-colors hover:bg-white/30"
                 >
                     Lihat Semua Pemenang
-                </motion.button>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                        setShowFinishedPopup(false);
-                        router.visit('/doorprize');
-                    }}
-                    className="flex-1 rounded-lg bg-yellow-500 px-6 py-3 font-bold text-black transition-colors hover:bg-yellow-400"
-                >
-                    Ok
                 </motion.button>
             </div>
         </motion.div>
