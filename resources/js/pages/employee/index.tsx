@@ -239,16 +239,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                         Nama
                                     </SortableHeader>
                                     <SortableHeader field="department">
-                                        Departemen
-                                    </SortableHeader>
-                                    <SortableHeader field="position">
-                                        Posisi
-                                    </SortableHeader>
-                                    <SortableHeader field="is_active">
-                                        Status
-                                    </SortableHeader>
-                                    <SortableHeader field="created_at">
-                                        Dibuat
+                                        Bagian
                                     </SortableHeader>
                                 </tr>
                                 </thead>
@@ -265,24 +256,13 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                     employees.data.map((employee: Employee) => (
                                         <tr key={employee.id} className="hover:bg-gray-50">
                                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {employee.employee_id}
+                                                {employee.id}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {employee.name}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {employee.department}
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {employee.position}
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap text-sm">
-                                                <Badge variant={employee.is_active ? "default" : "secondary"}>
-                                                    {employee.is_active ? 'Aktif' : 'Tidak Aktif'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {new Date(employee.created_at).toLocaleDateString('id-ID')}
                                             </td>
                                         </tr>
                                     ))
