@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Search, ChevronUp, ChevronDown, Users } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Users, Upload, Download, X } from 'lucide-react';
 import {
     Card,
     CardContent,
@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
     Select,
     SelectContent,
@@ -18,6 +17,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    Alert,
+    AlertDescription,
+} from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -88,6 +99,14 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
     const [urutanUrutan, setUrutanUrutan] = useState<'asc' | 'desc'>(filters.sortOrder || 'asc');
     const [perHalaman, setPerHalaman] = useState<number>(filters.perPage || 10);
 
+    // States untuk import
+    const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [uploadError, setUploadError] = useState<string>('');
+    const [dragActive, setDragActive] = useState<boolean>(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // Debounce pencarian
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -141,6 +160,126 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
         });
     };
 
+    // Fungsi untuk handle drag and drop
+    const handleDrag = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (validateFile(file)) {
+                setSelectedFile(file);
+                setUploadError('');
+            }
+        }
+    };
+
+    const validateFile = (file: File): boolean => {
+        const allowedTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'text/csv'
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            setUploadError('Format file tidak didukung. Gunakan Excel (.xlsx, .xls) atau CSV.');
+            return false;
+        }
+
+        if (file.size > 2 * 1024 * 1024) { // 2MB
+            setUploadError('Ukuran file terlalu besar. Maksimal 2MB.');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (validateFile(file)) {
+                setSelectedFile(file);
+                setUploadError('');
+            }
+        }
+    };
+
+    const handleImport = async () => {
+        if (!selectedFile) return;
+
+        setIsUploading(true);
+        setUploadError('');
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            // Use router.post with proper promise handling
+            router.post(route('employees.import'), formData, {
+                forceFormData: true,
+                preserveState: false,
+                preserveScroll: false,
+                onSuccess: (page) => {
+                    // Close dialog and reset state
+                    setShowImportDialog(false);
+                    setSelectedFile(null);
+                    setIsUploading(false);
+
+                    // Reset file input
+                    if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                    }
+
+                    // Optional: Show success message if available
+                    console.log('Import successful');
+                },
+                onError: (errors) => {
+                    setIsUploading(false);
+                    console.error('Import errors:', errors);
+
+                    // Handle specific error messages
+                    if (errors.file) {
+                        setUploadError(errors.file);
+                    } else if (errors.message) {
+                        setUploadError(errors.message);
+                    } else {
+                        setUploadError('Terjadi kesalahan saat upload');
+                    }
+                },
+                onFinish: () => {
+                    setIsUploading(false);
+                }
+            });
+        } catch (error) {
+            setIsUploading(false);
+            setUploadError('Terjadi kesalahan saat upload');
+            console.error('Upload error:', error);
+        }
+    };
+
+    const handleDownloadTemplate = () => {
+        window.location.href = route('employees.template');
+    };
+
+    const removeFile = () => {
+        setSelectedFile(null);
+        setUploadError('');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const SortableHeader = ({ field, children }: SortableHeaderProps) => (
         <th
             className="cursor-pointer hover:bg-gray-50 select-none px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b"
@@ -187,14 +326,139 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <Users className="h-8 w-8 text-blue-600" />
-                            <div>
-                                <CardTitle className="text-2xl">Karyawan</CardTitle>
-                                <CardDescription>
-                                    Kelola direktori karyawan Anda
-                                </CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Users className="h-8 w-8 text-blue-600" />
+                                <div>
+                                    <CardTitle className="text-2xl">Karyawan</CardTitle>
+                                    <CardDescription>
+                                        Kelola direktori karyawan Anda
+                                    </CardDescription>
+                                </div>
                             </div>
+                            <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                                <DialogTrigger asChild>
+                                    <Button className="gap-2">
+                                        <Upload className="h-4 w-4" />
+                                        Import Excel
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Import Data Karyawan</DialogTitle>
+                                        <DialogDescription>
+                                            Upload file Excel dengan 2 kolom: "Nomor" (employee_id) dan "Nama". Kedua kolom wajib diisi.
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <div className="space-y-4">
+                                        {/* Download Template Button */}
+                                        <div className="flex justify-center">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleDownloadTemplate}
+                                                className="gap-2"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                                Download Template
+                                            </Button>
+                                        </div>
+
+                                        {/* File Format Info */}
+                                        <div className="bg-blue-50 p-3 rounded-lg">
+                                            <div className="text-sm text-blue-800">
+                                                <div className="font-medium mb-1">Format File:</div>
+                                                <div className="space-y-1">
+                                                    <div>• Kolom 1: Nomor (employee_id)</div>
+                                                    <div>• Kolom 2: Nama (name)</div>
+                                                    <div>• Kedua kolom harus diisi</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* File Upload Area */}
+                                        <div
+                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                                                dragActive
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                            onDragEnter={handleDrag}
+                                            onDragLeave={handleDrag}
+                                            onDragOver={handleDrag}
+                                            onDrop={handleDrop}
+                                        >
+                                            {selectedFile ? (
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-center gap-2 text-green-600">
+                                                        <span className="text-sm font-medium">
+                                                            {selectedFile.name}
+                                                        </span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={removeFile}
+                                                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <Upload className="h-8 w-8 text-gray-400 mx-auto" />
+                                                    <div className="text-sm text-gray-600">
+                                                        Drag & drop file Excel di sini, atau{' '}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => fileInputRef.current?.click()}
+                                                            className="text-blue-600 hover:text-blue-800 font-medium"
+                                                        >
+                                                            browse
+                                                        </button>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        Mendukung .xlsx, .xls, .csv (max 2MB)
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={handleFileSelect}
+                                            className="hidden"
+                                        />
+
+                                        {uploadError && (
+                                            <Alert variant="destructive">
+                                                <AlertDescription>{uploadError}</AlertDescription>
+                                            </Alert>
+                                        )}
+
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setShowImportDialog(false)}
+                                            >
+                                                Batal
+                                            </Button>
+                                            <Button
+                                                onClick={handleImport}
+                                                disabled={!selectedFile || isUploading}
+                                            >
+                                                {isUploading ? 'Mengupload...' : 'Import'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -233,20 +497,17 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                 <thead className="bg-gray-50">
                                 <tr>
                                     <SortableHeader field="employee_id">
-                                        ID Karyawan
+                                        Nomor
                                     </SortableHeader>
                                     <SortableHeader field="name">
                                         Nama
-                                    </SortableHeader>
-                                    <SortableHeader field="department">
-                                        Bagian
                                     </SortableHeader>
                                 </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                 {employees.data.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-8 px-4">
+                                        <td colSpan={3} className="text-center py-8 px-4">
                                             <div className="text-gray-500">
                                                 {kataPencarian ? 'Tidak ada karyawan yang ditemukan sesuai pencarian Anda.' : 'Tidak ada karyawan yang ditemukan.'}
                                             </div>
@@ -256,13 +517,10 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                     employees.data.map((employee: Employee) => (
                                         <tr key={employee.id} className="hover:bg-gray-50">
                                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {employee.id}
+                                                {employee.employee_id || '-'}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {employee.name}
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {employee.department}
+                                                {employee.name || '-'}
                                             </td>
                                         </tr>
                                     ))

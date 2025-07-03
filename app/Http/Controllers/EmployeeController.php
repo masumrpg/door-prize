@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -62,12 +63,19 @@ class EmployeeController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
+        // Add logging for debugging
+        Log::info('Import request received', ['file' => $request->hasFile('file')]);
+
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:2048',
         ]);
 
         try {
             $file = $request->file('file');
+
+            // Add more logging
+            Log::info('Processing file', ['filename' => $file->getClientOriginalName()]);
+
             $data = Excel::toArray([], $file);
 
             if (empty($data) || empty($data[0])) {
@@ -82,15 +90,17 @@ class EmployeeController extends Controller
                 return strtolower(trim($h));
             }, $header);
 
-            // Cari index kolom yang diperlukan - tidak wajib ada keduanya
-            $nameIndex = $this->findColumnIndex($header, ['name', 'nama', 'employee_name', 'nama_karyawan']);
-            $departmentIndex = $this->findColumnIndex($header, ['department', 'departemen', 'dept', 'divisi']);
+            // Cari index kolom berdasarkan urutan: kolom 1 = employee_id, kolom 2 = name
+            $employeeIdIndex = 0; // Kolom pertama selalu employee_id
+            $nameIndex = 1; // Kolom kedua selalu name
 
-            if ($nameIndex === null && $departmentIndex === null) {
-                return redirect()->back()->with('error', 'Tidak ada kolom yang dikenali. Pastikan file Excel memiliki kolom "Name" atau "Department".');
+            // Validasi struktur file - harus ada minimal 2 kolom
+            if (count($header) < 2) {
+                return redirect()->back()->with('error', 'File Excel harus memiliki minimal 2 kolom: Nomor dan Nama.');
             }
 
             $successCount = 0;
+            $updatedCount = 0;
             $errors = [];
 
             foreach ($rows as $rowIndex => $row) {
@@ -101,21 +111,21 @@ class EmployeeController extends Controller
                     continue;
                 }
 
+                $employeeId = isset($row[$employeeIdIndex]) ? trim($row[$employeeIdIndex]) : '';
                 $name = isset($row[$nameIndex]) ? trim($row[$nameIndex]) : '';
-                $department = isset($row[$departmentIndex]) ? trim($row[$departmentIndex]) : '';
 
-                // Validasi data - minimal salah satu harus ada
-                if (empty($name) && empty($department)) {
-                    $errors[] = "Baris {$rowNumber}: Nama dan Departemen tidak boleh kosong semua.";
+                // Validasi data - employee_id dan name harus ada
+                if (empty($employeeId) || empty($name)) {
+                    $errors[] = "Baris {$rowNumber}: Nomor dan Nama tidak boleh kosong.";
                     continue;
                 }
 
                 $validator = Validator::make([
+                    'employee_id' => $employeeId,
                     'name' => $name,
-                    'department' => $department,
                 ], [
-                    'name' => 'nullable|string|max:255',
-                    'department' => 'nullable|string|max:255',
+                    'employee_id' => 'required|string|max:255',
+                    'name' => 'required|string|max:255',
                 ]);
 
                 if ($validator->fails()) {
@@ -124,69 +134,54 @@ class EmployeeController extends Controller
                 }
 
                 try {
-                    // Cek apakah employee sudah ada berdasarkan nama (jika nama ada)
-                    $existingEmployee = null;
-                    if (!empty($name)) {
-                        $existingEmployee = Employee::where('name', $name)->first();
-                    }
+                    // Cek apakah employee sudah ada berdasarkan employee_id
+                    $existingEmployee = Employee::where('employee_id', $employeeId)->first();
 
                     if ($existingEmployee) {
-                        // Update department jika employee sudah ada dan department tidak kosong
-                        $updateData = [];
-                        if (!empty($department)) {
-                            $updateData['department'] = $department;
-                        }
-
-                        if (!empty($updateData)) {
-                            $existingEmployee->update($updateData);
-                        }
+                        // Update nama jika employee sudah ada
+                        $existingEmployee->update([
+                            'name' => $name,
+                        ]);
+                        $updatedCount++;
                     } else {
                         // Buat employee baru
-                        $createData = [
+                        Employee::create([
+                            'employee_id' => $employeeId,
+                            'name' => $name,
                             'is_active' => true, // Default aktif
-                        ];
-
-                        if (!empty($name)) {
-                            $createData['name'] = $name;
-                        }
-
-                        if (!empty($department)) {
-                            $createData['department'] = $department;
-                        }
-
-                        Employee::create($createData);
+                        ]);
+                        $successCount++;
                     }
-
-                    $successCount++;
                 } catch (\Exception $e) {
                     $errors[] = "Baris {$rowNumber}: Gagal menyimpan data - " . $e->getMessage();
                 }
             }
 
-            $message = "Berhasil import {$successCount} data karyawan.";
+            $message = "Berhasil import {$successCount} karyawan baru";
+            if ($updatedCount > 0) {
+                $message .= " dan update {$updatedCount} karyawan existing";
+            }
+            $message .= ".";
+
             if (!empty($errors)) {
                 $message .= " Terdapat " . count($errors) . " error.";
             }
 
-            return redirect()->back()->with('success', $message)->with('import_errors', $errors);
+            // Add logging for success
+            \Log::info('Import completed', [
+                'success_count' => $successCount,
+                'updated_count' => $updatedCount,
+                'errors_count' => count($errors)
+            ]);
+
+            return redirect()->route('employees.index')->with('success', $message)->with('import_errors', $errors);
 
         } catch (\Exception $e) {
+            // Add logging for errors
+            \Log::error('Import failed', ['error' => $e->getMessage()]);
+
             return redirect()->back()->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Cari index kolom berdasarkan nama-nama yang mungkin
-     */
-    private function findColumnIndex(array $header, array $possibleNames): ?int
-    {
-        foreach ($possibleNames as $name) {
-            $index = array_search($name, $header);
-            if ($index !== false) {
-                return $index;
-            }
-        }
-        return null;
     }
 
     /**
@@ -195,15 +190,16 @@ class EmployeeController extends Controller
     public function downloadTemplate(): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $headers = [
-            'Name',
-            'Department',
+            'Nomor',
+            'Nama',
         ];
 
         $sampleData = [
-            ['John Doe', 'IT'],
-            ['Jane Smith', ''], // Contoh departemen kosong
-            ['', 'HR'], // Contoh nama kosong
-            ['Bob Johnson', 'Finance'],
+            ['001', 'John Doe'],
+            ['002', 'Jane Smith'],
+            ['003', 'Bob Johnson'],
+            ['004', 'Alice Brown'],
+            ['005', 'Charlie Wilson'],
         ];
 
         // Gabungkan header dengan sample data
