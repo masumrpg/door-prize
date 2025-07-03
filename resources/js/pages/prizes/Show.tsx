@@ -147,37 +147,37 @@ export default function PrizeShow({ prize }: Props) {
                     <div className="text-4xl">🎁</div>
                   )}
                 </div>
-                
+
                 <div className="space-y-4 flex-1">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Prize Name</h3>
                     <p className="text-lg">{prize.name}</p>
                   </div>
-                  
+
                   {prize.description && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Description</h3>
                       <p className="text-base">{prize.description}</p>
                     </div>
                   )}
-                  
+
                   <div className="flex gap-8">
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Total Stock</h3>
                       <p className="text-base">{prize.total_stock}</p>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Remaining Stock</h3>
                       <p className="text-base">{prize.remaining_stock}</p>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Awarded</h3>
                       <p className="text-base">{prize.total_stock - prize.remaining_stock}</p>
                     </div>
                   </div>
-                  
+
                   <div className="pt-2">
                     <Button asChild>
                       <Link href={`/prizes/${prize.id}/edit`}>
@@ -208,7 +208,7 @@ export default function PrizeShow({ prize }: Props) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <CalendarIcon className="h-8 w-8 text-green-500" />
@@ -218,7 +218,7 @@ export default function PrizeShow({ prize }: Props) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Package className="h-8 w-8 text-purple-500" />
@@ -269,7 +269,7 @@ export default function PrizeShow({ prize }: Props) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <Table>
                       <TableHeader>
                         <TableRow>

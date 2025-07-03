@@ -56,12 +56,6 @@ const formatDate = (dateString: string | number | Date) => {
     });
 };
 
-const formatTime = (timestamp: string | number | Date) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -199,7 +193,9 @@ export default function DoorprizeDashboard() {
                                     {prizes.map((prize) => (
                                         <div key={prize.id} className="flex items-center justify-between rounded-lg border p-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-4 w-4 rounded-full" style={{ backgroundColor: prize.color }} />
+                                                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
+                                                    <img src={prize.imageUrl} alt="image" className={'h-full w-full object-cover'} />
+                                                </div>
                                                 <div>
                                                     <p className="font-medium">{prize.name}</p>
                                                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -210,10 +206,9 @@ export default function DoorprizeDashboard() {
                                             <div className="flex items-center gap-2">
                                                 <div className="h-2 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
                                                     <div
-                                                        className="h-2 rounded-full transition-all duration-300"
+                                                        className={`h-2 rounded-full transition-all duration-300 bg-primary`}
                                                         style={{
                                                             width: `${(prize.stock / prize.totalStock) * 100}%`,
-                                                            backgroundColor: prize.color,
                                                         }}
                                                     />
                                                 </div>
@@ -240,11 +235,11 @@ export default function DoorprizeDashboard() {
                                 <div className="space-y-3">
                                     {recentWinners.map((winner) => (
                                         <div key={winner.id} className="flex items-center gap-3 rounded-lg border p-2">
-                                            <div className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: winner.prize.color }} />
+                                            <Users />
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-sm font-medium">{winner.employee.name}</p>
                                                 <p className="truncate text-xs text-gray-600 dark:text-gray-400">{winner.prize.name}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-500">{formatTime(winner.timestamp)}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-500">{winner.timestamp}</p>
                                             </div>
                                             <Badge variant="outline" className="text-xs">
                                                 #{winner.winnerNumber}
