@@ -35,7 +35,7 @@ export default function PrizeIndex({ prizes }: Props) {
       href: '/dashboard',
     },
     {
-      title: 'Prizes',
+      title: 'Hadiah',
       href: '/prizes',
     },
   ];
