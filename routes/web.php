@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::post('/employees/import', [EmployeeController::class, 'import'])->name('employees.import');
     Route::get('/employees/template', [EmployeeController::class, 'downloadTemplate'])->name('employees.template');
+    Route::delete('/employees/clear', [EmployeeController::class, 'clearAll'])->name('employees.clear');
 
     // Doorprize Events CRUD
     Route::resource('events', DoorprizeEventController::class);

@@ -222,4 +222,15 @@ class EmployeeController extends Controller
 
         return Excel::download($export, 'template_import_employee.xlsx');
     }
+
+    public function clearAll(): RedirectResponse
+    {
+        try {
+            Employee::query()->delete(); // Ganti truncate ke delete
+            return redirect()->route('employees.index')->with('success', 'Semua data karyawan berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus semua data karyawan', ['error' => $e->getMessage()]);
+            return redirect()->route('employees.index')->with('error', 'Gagal menghapus semua data karyawan: ' . $e->getMessage());
+        }
+    }
 }
