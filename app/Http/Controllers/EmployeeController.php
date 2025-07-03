@@ -168,7 +168,7 @@ class EmployeeController extends Controller
             }
 
             // Add logging for success
-            \Log::info('Import completed', [
+            Log::info('Import completed', [
                 'success_count' => $successCount,
                 'updated_count' => $updatedCount,
                 'errors_count' => count($errors)
@@ -178,7 +178,7 @@ class EmployeeController extends Controller
 
         } catch (\Exception $e) {
             // Add logging for errors
-            \Log::error('Import failed', ['error' => $e->getMessage()]);
+            Log::error('Import failed', ['error' => $e->getMessage()]);
 
             return redirect()->back()->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
         }

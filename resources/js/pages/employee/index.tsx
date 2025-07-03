@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Search, ChevronUp, ChevronDown, Users, Upload, Download, X } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Users, Upload, X } from 'lucide-react';
 import {
     Card,
     CardContent,
