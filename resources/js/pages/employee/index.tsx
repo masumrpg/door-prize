@@ -352,7 +352,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                 <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
                                     <DialogTrigger asChild>
                                         <Button variant="destructive" className="gap-2">
-                                            Hapus Semua Data
+                                            Hapus Semua Data Karyawan
                                         </Button>
                                     </DialogTrigger>
 
