@@ -295,7 +295,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
 
     const SortableHeader = ({ field, children }: SortableHeaderProps) => (
         <th
-            className="cursor-pointer border-b px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase select-none hover:bg-gray-50"
+            className="cursor-pointer border-b px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase select-none hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => handleSort(field)}
         >
             <div className="flex items-center gap-2">
@@ -534,17 +534,17 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                         {/* Tabel */}
                         <div className="overflow-hidden rounded-md border">
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                                <thead>
                                     <tr>
                                         <SortableHeader field="employee_id">Nomor Karyawan</SortableHeader>
                                         <SortableHeader field="name">Nama</SortableHeader>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 bg-white">
+                                <tbody className="divide-y divide-gray-200 bg-white dark:bg-black">
                                     {employees.data.length === 0 ? (
                                         <tr>
                                             <td colSpan={3} className="px-4 py-8 text-center">
-                                                <div className="text-gray-500">
+                                                <div className="text-gray-500 dark:text-white">
                                                     {kataPencarian
                                                         ? 'Tidak ada karyawan yang ditemukan sesuai pencarian Anda.'
                                                         : 'Tidak ada karyawan yang ditemukan.'}
@@ -554,10 +554,10 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                     ) : (
                                         employees.data.map((employee: Employee) => (
                                             <tr key={employee.id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
                                                     {employee.employee_id || '-'}
                                                 </td>
-                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
                                                     {employee.name || '-'}
                                                 </td>
                                             </tr>
