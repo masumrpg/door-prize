@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
+import { toast } from 'sonner';
 
 // TypeScript interfaces
 interface Employee {
@@ -228,9 +229,9 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
             // Use router.post with proper promise handling
             router.post(route('employees.import'), formData, {
                 forceFormData: true,
-                preserveState: false,
+                preserveState: true,
                 preserveScroll: false,
-                onSuccess: (page) => {
+                onSuccess: () => {
                     // Close dialog and reset state
                     setShowImportDialog(false);
                     setSelectedFile(null);
@@ -243,10 +244,13 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
 
                     // Optional: Show success message if available
                     console.log('Import successful');
+                    toast.success('Import successful');
                 },
                 onError: (errors) => {
                     setIsUploading(false);
                     console.error('Import errors:', errors);
+                    toast.error('Import errors');
+
 
                     // Handle specific error messages
                     if (errors.file) {
@@ -268,9 +272,9 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
         }
     };
 
-    const handleDownloadTemplate = () => {
-        window.location.href = route('employees.template');
-    };
+    // const handleDownloadTemplate = () => {
+    //     window.location.href = route('employees.template');
+    // };
 
     const removeFile = () => {
         setSelectedFile(null);
@@ -353,25 +357,25 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
 
                                     <div className="space-y-4">
                                         {/* Download Template Button */}
-                                        <div className="flex justify-center">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleDownloadTemplate}
-                                                className="gap-2"
-                                            >
-                                                <Download className="h-4 w-4" />
-                                                Download Template
-                                            </Button>
-                                        </div>
+                                        {/*<div className="flex justify-center">*/}
+                                        {/*    <Button*/}
+                                        {/*        variant="outline"*/}
+                                        {/*        size="sm"*/}
+                                        {/*        onClick={handleDownloadTemplate}*/}
+                                        {/*        className="gap-2"*/}
+                                        {/*    >*/}
+                                        {/*        <Download className="h-4 w-4" />*/}
+                                        {/*        Download Template*/}
+                                        {/*    </Button>*/}
+                                        {/*</div>*/}
 
                                         {/* File Format Info */}
                                         <div className="bg-blue-50 p-3 rounded-lg">
                                             <div className="text-sm text-blue-800">
-                                                <div className="font-medium mb-1">Format File:</div>
+                                                <div className="font-medium mb-1">Format File (2 Kolom):</div>
                                                 <div className="space-y-1">
-                                                    <div>• Kolom 1: Nomor (employee_id)</div>
-                                                    <div>• Kolom 2: Nama (name)</div>
+                                                    <div>• Kolom 1: Nomor</div>
+                                                    <div>• Kolom 2: Nama</div>
                                                     <div>• Kedua kolom harus diisi</div>
                                                 </div>
                                             </div>
