@@ -3,58 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Activity, Award, Calendar, Clock, Gift, TrendingUp, Trophy, Users } from 'lucide-react';
-
-// Mock data - replace with your actual props from Laravel
-const mockData = {
-    currentEvent: {
-        id: 1,
-        name: 'Annual Company Doorprize 2024',
-        date: '2024-12-15',
-        status: 'active',
-    },
-    stats: {
-        totalEmployees: 250,
-        totalWinners: 45,
-        availableCount: 205,
-        totalPrizes: 15,
-    },
-    prizes: [
-        { id: 1, name: 'iPhone 15', stock: 2, totalStock: 3, color: '#3B82F6' },
-        { id: 2, name: 'MacBook Air', stock: 0, totalStock: 1, color: '#10B981' },
-        { id: 3, name: 'AirPods Pro', stock: 8, totalStock: 10, color: '#F59E0B' },
-        { id: 4, name: 'Gift Voucher $100', stock: 15, totalStock: 20, color: '#EF4444' },
-    ],
-    recentWinners: [
-        {
-            id: 1,
-            employee: { name: 'John Doe', id: 'EMP001' },
-            prize: { name: 'iPhone 15', color: '#3B82F6' },
-            timestamp: '2024-12-15 14:30:00',
-            winnerNumber: 1,
-        },
-        {
-            id: 2,
-            employee: { name: 'Jane Smith', id: 'EMP002' },
-            prize: { name: 'AirPods Pro', color: '#F59E0B' },
-            timestamp: '2024-12-15 14:25:00',
-            winnerNumber: 2,
-        },
-        {
-            id: 3,
-            employee: { name: 'Mike Johnson', id: 'EMP003' },
-            prize: { name: 'Gift Voucher $100', color: '#EF4444' },
-            timestamp: '2024-12-15 14:20:00',
-            winnerNumber: 3,
-        },
-    ],
-    events: [
-        { id: 1, name: 'Annual Company Doorprize 2024', status: 'active', event_date: '2024-12-15', winners_count: 45 },
-        { id: 2, name: 'Mid Year Celebration', status: 'completed', event_date: '2024-06-15', winners_count: 32 },
-        { id: 3, name: 'New Year Event 2025', status: 'draft', event_date: '2025-01-15', winners_count: 0 },
-    ],
-};
+import { Prize, Winner } from '@/interface';
+import PageLoader from '@/components/page/Loader';
+import { useEffect, useRef } from 'react';
 
 interface PageProps {
     currentEvent?: {
@@ -64,6 +17,22 @@ interface PageProps {
         status: string;
         eventDate: string;
     }
+    stats?: {
+        totalEmployees: number;
+        totalWinners: number;
+        availableCount: number;
+        totalPrizes: number;
+    }
+    prizes?: Prize[];
+    recentWinners?: Winner[];
+    events?: {
+        id: number;
+        name: string;
+        description: string;
+        status: string;
+        eventDate: string;
+    }[];
+    [key: string]: unknown;
 }
 
 const getStatusColor = (status: string) => {
@@ -102,9 +71,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function DoorprizeDashboard() {
-    const {currentEvent:cEvent} = usePage<PageProps>().props;
-    console.log(cEvent);
-    const { currentEvent, stats, prizes, recentWinners, events } = mockData;
+    const {currentEvent, stats, prizes, recentWinners, events} = usePage<PageProps>().props;
+
+    const reloadedRef = useRef(false);
+
+    useEffect(() => {
+        if (!reloadedRef.current) {
+            reloadedRef.current = true;
+            router.reload();
+        }
+    }, []);
+
+    if (!currentEvent || !stats || !prizes || !recentWinners || !events) return <PageLoader/>
 
     const participationRate = ((stats.totalWinners / stats.totalEmployees) * 100).toFixed(1);
     const totalPrizesAwarded = prizes.reduce((sum, prize) => sum + (prize.totalStock - prize.stock), 0);
@@ -150,7 +128,7 @@ export default function DoorprizeDashboard() {
                             <CardContent>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                     <Calendar className="h-4 w-4" />
-                                    <span>Event Date: {formatDate(currentEvent.date)}</span>
+                                    <span>Event Date: {formatDate(currentEvent.eventDate)}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -277,33 +255,6 @@ export default function DoorprizeDashboard() {
                             </CardContent>
                         </Card>
                     </div>
-
-                    {/* Events Overview */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Calendar className="h-5 w-5" />
-                                Events Overview
-                            </CardTitle>
-                            <CardDescription>All doorprize events and their status</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {events.map((event) => (
-                                    <div key={event.id} className="rounded-lg border p-4">
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <Badge className={getStatusColor(event.status)}>
-                                                {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                                            </Badge>
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(event.event_date)}</span>
-                                        </div>
-                                        <h3 className="mb-1 font-medium">{event.name}</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">{event.winners_count} winners</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         </AppLayout>

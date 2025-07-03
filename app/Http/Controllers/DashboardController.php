@@ -28,7 +28,19 @@ class DashboardController extends Controller
             ];
         });
 
-        $currentEvent = DoorprizeEvent::active()->first();
+        $currentEventModel = DoorprizeEvent::active()->first();
+
+        if (!$currentEventModel) {
+            return Inertia::render('dashboard/error');
+        }
+
+        $currentEvent = $currentEventModel ? [
+            'id' => $currentEventModel->id,
+            'name' => $currentEventModel->name,
+            'description' => $currentEventModel->description,
+            'eventDate' => $currentEventModel->event_date,
+            'status' => $currentEventModel->status,
+        ] : null;
 
         $prizes = Prize::active()
             ->orderBy('sort_order')
@@ -45,7 +57,7 @@ class DashboardController extends Controller
             });
 
         $winners = Winner::with(['employee', 'prize'])
-            ->forEvent($currentEvent)
+            ->forEvent($currentEventModel)
             ->orderBy('drawn_at', 'desc')
             ->get()
             ->map(function ($winner) {
@@ -72,12 +84,12 @@ class DashboardController extends Controller
 
         // Ambil employee yang sudah menang (unique) untuk event ini
         $totalWinners = Winner::with('employee')
-            ->forEvent($currentEvent)
+            ->forEvent($currentEventModel)
             ->distinct('employee_id')
             ->count();
 
         // Ambil daftar employee yang belum menang sama sekali
-        $winnerEmployeeIds = Winner::forEvent($currentEvent)
+        $winnerEmployeeIds = Winner::forEvent($currentEventModel)
             ->distinct('employee_id')
             ->pluck('employee_id');
 
@@ -91,14 +103,16 @@ class DashboardController extends Controller
                 ];
             });
 
+        $availableEmployeesCount = $availableEmployees->count();
+
         $totalPrizes = Prize::active()->count();
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('dashboard/index', [
             "currentEvent" => $currentEvent,
             "stats" => [
                 "totalEmployees" => $totalEmployees,
                 "totalWinners" => $totalWinners,
-                "availableCount" => $availableEmployees,
+                "availableCount" => $availableEmployeesCount,
                 "totalPrizes" => $totalPrizes,
             ],
             "prizes" => $prizes,

@@ -5,8 +5,11 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { CalendarIcon, CheckCircle2, CircleDashed, Edit, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import PageLoader from '@/components/page/Loader';
+
+
 
 interface DoorprizeEvent {
   id: number;
@@ -37,25 +40,42 @@ export default function EventIndex({ events }: Props) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<DoorprizeEvent | null>(null);
 
+    const reloadedRef = useRef(false);
+
+    useEffect(() => {
+        if (!reloadedRef.current) {
+            reloadedRef.current = true;
+            router.reload();
+        }
+    }, []);
+
+  if (!events) return <PageLoader/>;
+
   const confirmDelete = (event: DoorprizeEvent) => {
     setEventToDelete(event);
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = () => {
-    if (eventToDelete) {
-      router.delete(`/events/${eventToDelete.id}`);
-    }
-    setDeleteDialogOpen(false);
-  };
+    const handleDelete = () => {
+        if (eventToDelete) {
+            router.delete(`/events/${eventToDelete.id}`, {
+                preserveState: false,
+            });
+        }
+        setDeleteDialogOpen(false);
+    };
 
-  const setActive = (event: DoorprizeEvent) => {
-    router.post(`/events/${event.id}/set-active`);
-  };
+    const setActive = (event: DoorprizeEvent) => {
+        router.post(`/events/${event.id}/set-active`, {}, {
+            preserveState: false,
+        });
+    };
 
-  const setCompleted = (event: DoorprizeEvent) => {
-    router.post(`/events/${event.id}/set-completed`);
-  };
+    const setCompleted = (event: DoorprizeEvent) => {
+        router.post(`/events/${event.id}/set-completed`, {}, {
+            preserveState: false,
+        });
+    };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -135,32 +155,32 @@ export default function EventIndex({ events }: Props) {
                               <Edit className="h-4 w-4" />
                             </Link>
                           </Button>
-                          
+
                           {event.status !== 'active' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => setActive(event)}
                               className="text-green-600 border-green-600 hover:bg-green-50"
                             >
                               Set Active
                             </Button>
                           )}
-                          
+
                           {event.status === 'active' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => setCompleted(event)}
                               className="text-blue-600 border-blue-600 hover:bg-blue-50"
                             >
                               Complete
                             </Button>
                           )}
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => confirmDelete(event)}
                             className="text-red-600 border-red-600 hover:bg-red-50"
                           >
