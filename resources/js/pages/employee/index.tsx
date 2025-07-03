@@ -332,7 +332,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Users className="h-8 w-8 text-blue-600" />
+                                <Users className="h-8 w-8 text-black dark:text-white" />
                                 <div>
                                     <CardTitle className="text-2xl">Karyawan</CardTitle>
                                     <CardDescription>
@@ -501,7 +501,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                 <thead className="bg-gray-50">
                                 <tr>
                                     <SortableHeader field="employee_id">
-                                        Nomor
+                                        Nomor Karyawan
                                     </SortableHeader>
                                     <SortableHeader field="name">
                                         Nama
