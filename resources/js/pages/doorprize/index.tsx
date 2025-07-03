@@ -7,6 +7,7 @@ import FinishedPopup from '@/components/doorprize/FinishedPopup';
 import StockFinishedPopup from '@/components/doorprize/StockFinishedPopup';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
+import { toast, Toaster } from 'sonner';
 
 interface EmployeeStats {
     totalEmployees: number;
@@ -178,16 +179,17 @@ const Doorprize: React.FC = () => {
                         }
                     }
                 } else {
-                    alert('Gagal melakukan undian: ' + response.data.error);
+                    console.error('Gagal melakukan undian: ' + response.data.error);
+                    toast.error("Gagal melakukan undian", response.data.error);
                 }
             } catch (error: unknown) {
                 console.error('Error drawing winner:', error);
                 if (axios.isAxiosError(error)) {
-                    alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+                    toast.error('Terjadi kesalahan', error.response?.data?.error || error);
                 } else if (error instanceof Error) {
-                    alert('Terjadi kesalahan umum: ' + error.message);
+                    toast.error('Terjadi kesalahan umum :' + error.message)
                 } else {
-                    alert('Kesalahan tidak diketahui');
+                    toast.error('Kesalahan tidak diketahui');
                 }
             } finally {
                 setIsDrawing(false);
@@ -226,18 +228,18 @@ const Doorprize: React.FC = () => {
                 // Reload available employees
                 await loadAvailableEmployees();
 
-                alert('Data undian berhasil direset!');
+                toast.success('Data undian berhasil direset!');
             } else {
-                alert('Gagal mereset data: ' + response.data.error);
+                toast.error('Gagal mereset data: ' + response.data.error)
             }
         } catch (error: unknown) {
             console.error('Error resetting draw:', error);
             if (axios.isAxiosError(error)) {
-                alert('Terjadi kesalahan: ' + (error.response?.data?.error || error.message));
+                toast.error('Terjadi kesalahan: ' + (error.response?.data?.error || error.message))
             } else if (error instanceof Error) {
-                alert('Terjadi kesalahan umum: ' + error.message);
+                toast.error('Terjadi kesalahan umum: ' + error.message)
             } else {
-                alert('Kesalahan tidak diketahui');
+                toast.error('Kesalahan tidak diketahui')
             }
         }
     }, [isDrawing, initPrizes, employees, loadAvailableEmployees]);
@@ -631,6 +633,7 @@ const Doorprize: React.FC = () => {
                         <StockFinishedPopup currentPrize={currentPrize} setShowStockFinishedPopup={setShowStockFinishedPopup} />
                     )}
                     {showAllPrizes && <AllWinnersModal prizes={prizes} winners={winners} setShowAllPrizes={setShowAllPrizes} />}
+                    <Toaster richColors position="top-right" />
                 </AnimatePresence>
             </div>
         </div>
