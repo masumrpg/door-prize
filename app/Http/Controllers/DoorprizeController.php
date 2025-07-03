@@ -63,6 +63,10 @@ class DoorprizeController extends Controller
         // Ambil semua employee yang aktif
         $totalEmployees = Employee::active()->count();
 
+        if ($totalEmployees === 0) {
+            return Inertia::render('doorprize/error');
+        }
+
         // Ambil employee yang sudah menang (unique) untuk event ini
         $totalWinners = Winner::with('employee')
             ->forEvent($currentEvent)
