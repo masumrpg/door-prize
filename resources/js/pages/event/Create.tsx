@@ -43,7 +43,7 @@ export default function EventCreate() {
         <div className="flex items-center mb-6">
           <Button variant="outline" size="sm" className="mr-4" asChild>
             <a href="/events">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Events
+              <ArrowLeft className="h-4 w-4" />
             </a>
           </Button>
           <h1 className="text-2xl font-bold">Create Doorprize Event</h1>

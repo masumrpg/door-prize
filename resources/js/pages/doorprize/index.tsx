@@ -360,7 +360,7 @@ const Doorprize: React.FC = () => {
                                             <img
                                                 src={currentPrize.imageUrl}
                                                 alt={currentPrize.name}
-                                                className="h-full w-full object-cover"
+                                                className="h-full w-full object-contain"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.style.display = 'none';

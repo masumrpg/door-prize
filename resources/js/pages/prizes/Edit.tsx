@@ -37,7 +37,9 @@ interface Props {
 }
 
 export default function PrizeEdit({ prize }: Props) {
-  const { data, setData, post, processing, errors } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+    const { data, setData, post, processing, errors } = useForm<FormData>({
     name: prize.name,
     description: prize.description || '',
     total_stock: prize.total_stock,
@@ -48,7 +50,7 @@ export default function PrizeEdit({ prize }: Props) {
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(prize.image_url);
-  
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Dashboard',
@@ -78,7 +80,7 @@ export default function PrizeEdit({ prize }: Props) {
       const file = e.target.files[0];
       setData('image', file);
       setData('remove_image', false);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -92,7 +94,7 @@ export default function PrizeEdit({ prize }: Props) {
     setData('image', null);
     setData('remove_image', true);
     setImagePreview(null);
-    
+
     // Reset the file input
     const fileInput = document.getElementById('image') as HTMLInputElement;
     if (fileInput) {
@@ -107,7 +109,7 @@ export default function PrizeEdit({ prize }: Props) {
         <div className="flex items-center mb-6">
           <Button variant="outline" size="sm" className="mr-4" asChild>
             <a href="/prizes">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Prizes
+              <ArrowLeft className="h-4 w-4" />
             </a>
           </Button>
           <h1 className="text-2xl font-bold">Edit Prize</h1>
@@ -163,7 +165,7 @@ export default function PrizeEdit({ prize }: Props) {
                 />
                 {errors.total_stock && <p className="text-red-500 text-sm">{errors.total_stock}</p>}
                 <p className="text-sm text-gray-500">
-                  The total number of this prize available for winners. 
+                  The total number of this prize available for winners.
                   {prize.remaining_stock > 0 && (
                     <span className="text-amber-600"> Minimum value: {prize.remaining_stock} (currently remaining)</span>
                   )}

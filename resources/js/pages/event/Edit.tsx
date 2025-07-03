@@ -60,8 +60,8 @@ export default function EventEdit({ event }: Props) {
       <div className="p-4">
         <div className="flex items-center mb-6">
           <Button variant="outline" size="sm" className="mr-4" asChild>
-            <a href={`/events/${event.id}`}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Event
+            <a href={`/events`}>
+              <ArrowLeft className=" h-4 w-4" />
             </a>
           </Button>
           <h1 className="text-2xl font-bold">Edit Event</h1>

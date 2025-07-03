@@ -49,7 +49,7 @@ interface Props {
 
 export default function EventShow({ event }: Props) {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Dashboard',
@@ -126,7 +126,7 @@ export default function EventShow({ event }: Props) {
         <div className="flex items-center mb-6">
           <Button variant="outline" size="sm" className="mr-4" asChild>
             <a href="/events">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Events
+              <ArrowLeft className="h-4 w-4" />
             </a>
           </Button>
           <h1 className="text-2xl font-bold">{event.name}</h1>
@@ -147,32 +147,32 @@ export default function EventShow({ event }: Props) {
                   <h3 className="text-sm font-medium text-gray-500">Event Name</h3>
                   <p className="text-lg">{event.name}</p>
                 </div>
-                
+
                 {event.description && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Description</h3>
                     <p className="text-base">{event.description}</p>
                   </div>
                 )}
-                
+
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Event Date</h3>
                   <p className="text-base">{formatDate(event.event_date)}</p>
                 </div>
-                
+
                 <div className="flex gap-4 pt-4">
                   <Button asChild>
                     <Link href={`/events/${event.id}/edit`}>
                       <Edit className="mr-2 h-4 w-4" /> Edit Event
                     </Link>
                   </Button>
-                  
+
                   {event.status === 'active' && (
                     <Button variant="outline" onClick={() => setResetDialogOpen(true)}>
                       <RotateCcw className="mr-2 h-4 w-4" /> Reset Winners
                     </Button>
                   )}
-                  
+
                   {event.status === 'active' && (
                     <Button variant="outline" asChild>
                       <Link href="/doorprize">
@@ -203,7 +203,7 @@ export default function EventShow({ event }: Props) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Gift className="h-8 w-8 text-green-500" />
@@ -213,7 +213,7 @@ export default function EventShow({ event }: Props) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Users className="h-8 w-8 text-purple-500" />
@@ -283,7 +283,7 @@ export default function EventShow({ event }: Props) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <Table>
                       <TableHeader>
                         <TableRow>
