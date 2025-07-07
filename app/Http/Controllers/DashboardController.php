@@ -66,6 +66,7 @@ class DashboardController extends Controller
                     'employee' => [
                         'id' => $winner->employee->employee_id,
                         'name' => $winner->employee->name,
+                    'employeeId' => $winner->employee->employee_id,
                     ],
                     'prize' => [
                         'id' => $winner->prize->id,

@@ -2,6 +2,7 @@
 export interface Employee {
     id: string;
     name: string;
+    employeeId: string;
 }
 
 export interface Prize {
