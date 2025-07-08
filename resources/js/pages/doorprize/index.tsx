@@ -57,7 +57,7 @@ const Confetti: React.FC<{ isActive: boolean; fullScreen?: boolean }> = ({ isAct
     if (!isActive) return null;
 
     return (
-        <div className={`pointer-events-none ${fullScreen ? 'fixed inset-0 z-50' : 'absolute inset-0'} overflow-hidden`}>
+        <div className={`pointer-events-none ${fullScreen ? 'fixed inset-0 z-50' : 'absolute inset-0'} overflow-hidden z-50`}>
             {confettiPieces.map((piece) => (
                 <motion.div
                     key={piece.id}
