@@ -73,7 +73,7 @@ const getStatusText = (status: string) => {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dasbor',
+        title: 'Dashboard',
         href: '/dashboard',
     },
 ];
@@ -109,7 +109,7 @@ export default function DoorprizeDashboard() {
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dasbor Doorprize</h1>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
                             <p className="mt-1 text-gray-600 dark:text-gray-400">Kelola acara doorprize dan lacak pemenang</p>
                         </div>
                         <div className="flex gap-2">

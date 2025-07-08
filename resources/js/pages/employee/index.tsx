@@ -85,7 +85,7 @@ interface PaginationButtonProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dasbor',
+        title: 'Dashboard',
         href: '/dashboard',
     },
     {
@@ -295,7 +295,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
 
     const SortableHeader = ({ field, children }: SortableHeaderProps) => (
         <th
-            className="cursor-pointer border-b px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase select-none hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="cursor-pointer border-b px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 dark:text-gray-400 uppercase select-none hover:bg-gray-50 dark:hover:bg-gray-700"
             onClick={() => handleSort(field)}
         >
             <div className="flex items-center gap-2">
@@ -419,8 +419,8 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                             {/*</div>*/}
 
                                             {/* File Format Info */}
-                                            <div className="rounded-lg bg-blue-50 p-3">
-                                                <div className="text-sm text-blue-800">
+                                            <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+                                                <div className="text-sm text-blue-800 dark:text-blue-200">
                                                     <div className="mb-1 font-medium">Format File (2 Kolom):</div>
                                                     <div className="space-y-1">
                                                         <div>• Kolom 1: Nomor</div>
@@ -433,7 +433,9 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                             {/* File Upload Area */}
                                             <div
                                                 className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-                                                    dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+                                                    dragActive
+                                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                                                 }`}
                                                 onDragEnter={handleDrag}
                                                 onDragLeave={handleDrag}
@@ -442,33 +444,37 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                                             >
                                                 {selectedFile ? (
                                                     <div className="space-y-2">
-                                                        <div className="flex items-center justify-center gap-2 text-green-600">
+                                                        <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
                                                             <span className="text-sm font-medium">{selectedFile.name}</span>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={removeFile}
-                                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                                             >
                                                                 <X className="h-4 w-4" />
                                                             </Button>
                                                         </div>
-                                                        <div className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-2">
-                                                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                                                        <div className="text-sm text-gray-600">
+                                                        <Upload className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
+                                                        <div className="text-sm text-gray-600 dark:text-gray-300">
                                                             Drag & drop file Excel di sini, atau{' '}
                                                             <button
                                                                 type="button"
                                                                 onClick={() => fileInputRef.current?.click()}
-                                                                className="font-medium text-blue-600 hover:text-blue-800"
+                                                                className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                                                             >
                                                                 browse
                                                             </button>
                                                         </div>
-                                                        <div className="text-xs text-gray-500">Mendukung .xlsx, .xls, .csv (max 2MB)</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            Mendukung .xlsx, .xls, .csv (max 2MB)
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -505,7 +511,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                         {/* Pencarian dan Filter */}
                         <div className="mb-6 flex flex-col gap-4 sm:flex-row">
                             <div className="relative flex-1">
-                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400 dark:text-gray-500" />
                                 <Input
                                     placeholder="Cari karyawan..."
                                     value={kataPencarian}
@@ -527,42 +533,42 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                         </div>
 
                         {/* Ringkasan Hasil */}
-                        <div className="mb-4 text-sm text-gray-600">
+                        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                             Menampilkan {employees.from || 0} sampai {employees.to || 0} dari {employees.total} karyawan
                         </div>
 
                         {/* Tabel */}
-                        <div className="overflow-hidden rounded-md border">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr>
-                                        <SortableHeader field="employee_id">Nomor Karyawan</SortableHeader>
-                                        <SortableHeader field="name">Nama</SortableHeader>
-                                    </tr>
+                        <div className="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <SortableHeader field="employee_id">Nomor Karyawan</SortableHeader>
+                                    <SortableHeader field="name">Nama</SortableHeader>
+                                </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 bg-white dark:bg-black">
-                                    {employees.data.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={3} className="px-4 py-8 text-center">
-                                                <div className="text-gray-500 dark:text-white">
-                                                    {kataPencarian
-                                                        ? 'Tidak ada karyawan yang ditemukan sesuai pencarian Anda.'
-                                                        : 'Tidak ada karyawan yang ditemukan.'}
-                                                </div>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                                {employees.data.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-4 py-8 text-center">
+                                            <div className="text-gray-500 dark:text-gray-400">
+                                                {kataPencarian
+                                                    ? 'Tidak ada karyawan yang ditemukan sesuai pencarian Anda.'
+                                                    : 'Tidak ada karyawan yang ditemukan.'}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    employees.data.map((employee: Employee) => (
+                                        <tr key={employee.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                                {employee.employee_id || '-'}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                                {employee.name || '-'}
                                             </td>
                                         </tr>
-                                    ) : (
-                                        employees.data.map((employee: Employee) => (
-                                            <tr key={employee.id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                                                    {employee.employee_id || '-'}
-                                                </td>
-                                                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                                                    {employee.name || '-'}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -570,7 +576,7 @@ export default function EmployeeIndex({ employees, filters }: EmployeeIndexProps
                         {/* Pagination */}
                         {employees.last_page > 1 && (
                             <div className="mt-6 flex items-center justify-between">
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
                                     Halaman {employees.current_page} dari {employees.last_page}
                                 </div>
                                 <div className="flex items-center gap-2">

@@ -9,7 +9,7 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Selamat Datang - Event Doorprize">
+            <Head title="Lucky Draw System">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
@@ -45,9 +45,9 @@ export default function Welcome() {
                         <div className="flex-1 space-y-6">
                             <div className="text-center lg:text-left">
                                 <h1 className="mb-4 text-4xl font-bold tracking-tight lg:text-6xl">
-                                    Selamat Datang di{' '}
+                                    Selamat Datang di aplikasi{' '}
                                     <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                        Event Doorprize
+                                        Lucky Draw System
                                     </span>
                                 </h1>
                                 <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 lg:text-xl">
@@ -63,9 +63,9 @@ export default function Welcome() {
                                         </Link>
                                     </Button>
                                     <Button asChild variant="outline" size="lg">
-                                        <Link href={route('events.index')}>
+                                        <Link href={'/dashboard'}>
                                             <Gift className="mr-2 h-5 w-5" />
-                                            Lihat Event
+                                            Dashboard
                                         </Link>
                                     </Button>
                                 </div>
