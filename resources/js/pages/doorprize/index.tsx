@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift,  Trophy, Users, ExternalLink, CalendarDays, Home } from 'lucide-react';
+import { Gift, Trophy, Users, ExternalLink, CalendarDays, Home } from 'lucide-react';
 import { Employee, Prize, Winner } from '@/interface';
 import AllWinnersModal from '@/components/doorprize/AllWinnersModal';
 import FinishedPopup from '@/components/doorprize/FinishedPopup';
@@ -29,6 +29,70 @@ type PageProps = {
     stats: EmployeeStats;
 };
 
+// Confetti Component
+const Confetti: React.FC<{ isActive: boolean; fullScreen?: boolean }> = ({ isActive, fullScreen = false }) => {
+    const [confettiPieces, setConfettiPieces] = useState<Array<{ id: number; x: number; y: number; color: string; rotation: number; size: number }>>([]);
+
+    useEffect(() => {
+        if (isActive) {
+            const pieces = Array.from({ length: fullScreen ? 150 : 50 }, (_, i) => ({
+                id: i,
+                x: Math.random() * (fullScreen ? window.innerWidth : 300),
+                y: Math.random() * (fullScreen ? window.innerHeight : 200),
+                color: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'][Math.floor(Math.random() * 8)],
+                rotation: Math.random() * 360,
+                size: Math.random() * 8 + 4
+            }));
+            setConfettiPieces(pieces);
+
+            // Clear confetti after animation
+            const timer = setTimeout(() => {
+                setConfettiPieces([]);
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isActive, fullScreen]);
+
+    if (!isActive) return null;
+
+    return (
+        <div className={`pointer-events-none ${fullScreen ? 'fixed inset-0 z-50' : 'absolute inset-0'} overflow-hidden`}>
+            {confettiPieces.map((piece) => (
+                <motion.div
+                    key={piece.id}
+                    className="absolute"
+                    style={{
+                        left: piece.x,
+                        top: piece.y,
+                        backgroundColor: piece.color,
+                        width: piece.size,
+                        height: piece.size,
+                        borderRadius: '50%',
+                    }}
+                    initial={{
+                        opacity: 1,
+                        scale: 0,
+                        rotate: piece.rotation,
+                        y: piece.y - 100
+                    }}
+                    animate={{
+                        opacity: [1, 1, 0],
+                        scale: [0, 1, 0.8],
+                        rotate: piece.rotation + 360,
+                        y: piece.y + (fullScreen ? 300 : 150),
+                        x: piece.x + (Math.random() - 0.5) * 100
+                    }}
+                    transition={{
+                        duration: 3,
+                        ease: "easeOut"
+                    }}
+                />
+            ))}
+        </div>
+    );
+};
+
 const Doorprize: React.FC = () => {
     const { employees, prizes: initPrizes, winners: initWinners, event, stats } = usePage<PageProps>().props;
 
@@ -50,6 +114,10 @@ const Doorprize: React.FC = () => {
     // Available employees for current prize
     const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
     const [loadingEmployees, setLoadingEmployees] = useState<boolean>(false);
+
+    // Confetti states
+    const [showWinnerConfetti, setShowWinnerConfetti] = useState<boolean>(false);
+    const [showFullScreenConfetti, setShowFullScreenConfetti] = useState<boolean>(false);
 
     // Get current prize (show all prizes, not just available ones)
     const currentPrize = useMemo(() => {
@@ -115,6 +183,7 @@ const Doorprize: React.FC = () => {
         setIsSpinning(true);
         setIsDrawing(true);
         setShowWinner(false);
+        setShowWinnerConfetti(false);
         setSpeed(50);
 
         // Gradually slow down the spinning
@@ -139,6 +208,8 @@ const Doorprize: React.FC = () => {
 
                 if (response.data.success) {
                     setShowWinner(true);
+                    // Show confetti for winner
+                    setShowWinnerConfetti(true);
 
                     // Update winners list
                     setWinners((prev) => [response.data.winner, ...prev]);
@@ -151,19 +222,14 @@ const Doorprize: React.FC = () => {
 
                     // Check if current prize stock is finished
                     if (response.data.prize.stock === 0) {
-                        setTimeout(() => {
-                            setShowStockFinishedPopup(true);
-                        }, 2000);
-                    }
-
-                    if (response.data.prize.stock === 0) {
                         // Cek apakah ini hadiah terakhir yang habis
                         const updatedPrizes = prizes.map((p) => (p.id === currentPrize.id ? { ...p, stock: response.data.prize.stock } : p));
-
                         const isLastPrizeFinished = updatedPrizes.every((p) => p.stock === 0);
 
                         if (isLastPrizeFinished) {
+                            // Show full screen confetti for all prizes finished
                             setTimeout(() => {
+                                setShowFullScreenConfetti(true);
                                 setShowFinishedPopup(true);
                             }, 2000);
                         } else {
@@ -218,6 +284,8 @@ const Doorprize: React.FC = () => {
                 setSpinCounter(0);
                 setShowFinishedPopup(false);
                 setShowStockFinishedPopup(false);
+                setShowWinnerConfetti(false);
+                setShowFullScreenConfetti(false);
 
                 // Reload available employees
                 await loadAvailableEmployees();
@@ -268,28 +336,33 @@ const Doorprize: React.FC = () => {
     if (!currentPrize && allPrizesFinished) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4">
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="text-center text-white">
+                <Confetti isActive={showFullScreenConfetti} fullScreen={true} />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center text-white px-4 max-w-2xl mx-auto"
+                >
                     <Trophy size={100} className="mx-auto mb-6 text-amber-400" />
-                    <h1 className="mb-4 text-4xl font-bold">🎉 Semua Hadiah Telah Terbagi! atau Belum Bikin Hadiah! 🎉</h1>
-                    <p className="mb-8 text-xl text-slate-200">Terima kasih atas partisipasi semua karyawan</p>
-                    <div className="flex justify-center gap-4">
+                    <h1 className="mb-4 text-2xl md:text-4xl font-bold">🎉 Semua Hadiah Telah Terbagi! 🎉</h1>
+                    <p className="mb-8 text-lg md:text-xl text-slate-200">Terima kasih atas partisipasi semua karyawan</p>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={resetDraw}
                             disabled={isDrawing}
-                            className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-8 py-4 text-xl font-bold transition-colors hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50"
+                            className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 md:px-8 py-3 md:py-4 text-lg md:text-xl font-bold transition-colors hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50"
                         >
-                            Ke Hadiah
+                            Reset Undian
                         </motion.button>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={goToAllWinners}
-                            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-xl font-bold transition-colors hover:from-blue-700 hover:to-blue-800"
+                            className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 md:px-8 py-3 md:py-4 text-lg md:text-xl font-bold transition-colors hover:from-blue-700 hover:to-blue-800"
                         >
-                            <ExternalLink size={24} />
-                            Ke Dashboard
+                            <ExternalLink size={20} />
+                            Lihat Semua Pemenang
                         </motion.button>
                     </div>
                 </motion.div>
@@ -300,78 +373,110 @@ const Doorprize: React.FC = () => {
     return (
         <>
             <Head title="Undian" />
+            <Confetti isActive={showFullScreenConfetti} fullScreen={true} />
 
-            <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-4">
-                <div className="mx-auto max-w-6xl">
+            <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 p-2 md:p-4">
+                <div className="mx-auto max-w-7xl">
                     {/* Header */}
-                    <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
-                        <h1 className="mb-4 flex items-center justify-center gap-3 text-5xl font-bold text-white">
-                            <Gift className="text-amber-400" size={50} />
-                            {event.name.toLocaleUpperCase()}
-                            <Gift className="text-amber-400" size={50} />
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-4 md:mb-8 text-center px-2"
+                    >
+                        <h1 className="mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-3 text-2xl md:text-3xl lg:text-5xl font-bold text-white">
+                            <Gift className="text-amber-400" size={40} />
+                            <span className="text-center">{event.name.toLocaleUpperCase()}</span>
+                            <Gift className="text-amber-400" size={40} />
                         </h1>
-                        <p className="flex items-center justify-center gap-2 text-xl text-slate-300">
-                            <Users size={24} />
-                            {event.date}
+                        <p className="flex flex-col sm:flex-row items-center justify-center gap-2 text-lg md:text-xl text-slate-300">
+                            <Users size={20} />
+                            <span>{event.date}</span>
                         </p>
-                        <p className="text-lg text-slate-400">Total {stats.totalEmployees} Karyawan Berpartisipasi</p>
-                        <div className="mt-4 flex justify-center gap-4">
+                        <p className="text-base md:text-lg text-slate-400 mt-2">
+                            Total {stats.totalEmployees} Karyawan Berpartisipasi
+                        </p>
+
+                        {/* Navigation Menu */}
+                        <div className="mt-4 flex flex-wrap justify-center gap-2 md:gap-4">
                             <a
                                 href="/dashboard"
-                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
+                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-3 md:px-4 py-2 text-sm md:text-base font-medium text-white transition-colors hover:bg-slate-600"
                             >
-                                <Home size={18} />
-                                Dashboard
+                                <Home size={16} />
+                                <span className="hidden sm:inline">Dashboard</span>
                             </a>
                             <a
                                 href="/events"
-                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
+                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-3 md:px-4 py-2 text-sm md:text-base font-medium text-white transition-colors hover:bg-slate-600"
                             >
-                                <CalendarDays size={18} />
-                                Kelola Events
+                                <CalendarDays size={16} />
+                                <span className="hidden sm:inline">Events</span>
                             </a>
                             <a
                                 href="/prizes"
-                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-600"
+                                className="flex items-center gap-2 rounded-lg bg-slate-700 px-3 md:px-4 py-2 text-sm md:text-base font-medium text-white transition-colors hover:bg-slate-600"
                             >
-                                <Gift size={18} />
-                                Kelola Hadiah
+                                <Gift size={16} />
+                                <span className="hidden sm:inline">Hadiah</span>
                             </a>
                         </div>
                     </motion.div>
 
-                    <div className="grid gap-8 lg:grid-cols-3">
+                    {/* Main Content Grid */}
+                    <div className="grid gap-4 md:gap-6 lg:gap-8 lg:grid-cols-3">
                         {/* Main Draw Area */}
-                        <MainDrawArea
-                            startDraw={startDraw}
-                            isDrawing={isDrawing}
-                            resetDraw={resetDraw}
-                            prizes={prizes}
-                            availableEmployees={availableEmployees}
-                            showWinner={showWinner}
-                            goToAllWinners={goToAllWinners}
-                            loadingEmployees={loadingEmployees}
-                            currentPrizeWinners={currentPrizeWinners}
-                            currentPrize={currentPrize}
-                            currentPrizeIndex={currentPrizeIndex}
-                            isSpinning={isSpinning}
-                            currentEmployee={currentEmployee}
-                            goToNextPrize={goToNextPrize}
-                            goToPrevPrize={goToPrevPrize}
-                            spinCounter={spinCounter}
-                        />
+                        <div className="lg:col-span-2 relative">
+                            <Confetti isActive={showWinnerConfetti} />
+                            <MainDrawArea
+                                startDraw={startDraw}
+                                isDrawing={isDrawing}
+                                resetDraw={resetDraw}
+                                prizes={prizes}
+                                availableEmployees={availableEmployees}
+                                showWinner={showWinner}
+                                goToAllWinners={goToAllWinners}
+                                loadingEmployees={loadingEmployees}
+                                currentPrizeWinners={currentPrizeWinners}
+                                currentPrize={currentPrize}
+                                currentPrizeIndex={currentPrizeIndex}
+                                isSpinning={isSpinning}
+                                currentEmployee={currentEmployee}
+                                goToNextPrize={goToNextPrize}
+                                goToPrevPrize={goToPrevPrize}
+                                spinCounter={spinCounter}
+                            />
+                        </div>
 
                         {/* Current Prize Winners */}
-                        <CurrentPrizeWinner currentPrize={currentPrize} currentPrizeWinners={currentPrizeWinners}/>
+                        <div className="lg:col-span-1">
+                            <CurrentPrizeWinner
+                                currentPrize={currentPrize}
+                                currentPrizeWinners={currentPrizeWinners}
+                            />
+                        </div>
                     </div>
 
                     {/* Popups */}
                     <AnimatePresence>
-                        {showFinishedPopup && <FinishedPopup setShowAllPrizes={setShowAllPrizes} setShowFinishedPopup={setShowFinishedPopup} />}
-                        {showStockFinishedPopup && (
-                            <StockFinishedPopup currentPrize={currentPrize} setShowStockFinishedPopup={setShowStockFinishedPopup} />
+                        {showFinishedPopup && (
+                            <FinishedPopup
+                                setShowAllPrizes={setShowAllPrizes}
+                                setShowFinishedPopup={setShowFinishedPopup}
+                            />
                         )}
-                        {showAllPrizes && <AllWinnersModal prizes={prizes} winners={winners} setShowAllPrizes={setShowAllPrizes} />}
+                        {showStockFinishedPopup && (
+                            <StockFinishedPopup
+                                currentPrize={currentPrize}
+                                setShowStockFinishedPopup={setShowStockFinishedPopup}
+                            />
+                        )}
+                        {showAllPrizes && (
+                            <AllWinnersModal
+                                prizes={prizes}
+                                winners={winners}
+                                setShowAllPrizes={setShowAllPrizes}
+                            />
+                        )}
                         <Toaster richColors position="top-right" />
                     </AnimatePresence>
                 </div>
