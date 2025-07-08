@@ -107,12 +107,14 @@ export default function DoorprizeDashboard() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
                     {/* Header */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-                            <p className="mt-1 text-gray-600 dark:text-gray-400">Kelola acara doorprize dan lacak pemenang</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">Dashboard</h1>
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                                Kelola acara doorprize dan lacak pemenang
+                            </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row">
                             <Button
                                 variant="outline"
                                 className="flex items-center gap-2 hover:cursor-pointer"
@@ -132,14 +134,16 @@ export default function DoorprizeDashboard() {
                     {currentEvent && (
                         <Card className="border-l-4 border-l-blue-500">
                             <CardHeader>
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex items-center gap-2">
                                         <Activity className="h-5 w-5 text-blue-500" />
                                         <CardTitle className="text-lg">Acara Aktif Saat Ini</CardTitle>
                                     </div>
                                     <Badge className={getStatusColor(currentEvent.status)}>{getStatusText(currentEvent.status)}</Badge>
                                 </div>
-                                <CardDescription className="text-xl font-semibold text-gray-900 dark:text-white">{currentEvent.name}</CardDescription>
+                                <CardDescription className="text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+                                    {currentEvent.name}
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -151,7 +155,7 @@ export default function DoorprizeDashboard() {
                     )}
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Total Karyawan</CardTitle>
@@ -204,7 +208,7 @@ export default function DoorprizeDashboard() {
                         {/* Prize Stock Status */}
                         <Card className="lg:col-span-2">
                             <CardHeader>
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <CardTitle className="flex items-center gap-2">
                                             <Gift className="h-5 w-5" />
@@ -219,25 +223,25 @@ export default function DoorprizeDashboard() {
                                                 Lihat Semua
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-h-[85vh] max-w-5xl">
+                                        <DialogContent className="max-h-[90vh] max-w-[95vw] sm:max-w-4xl lg:max-w-6xl">
                                             <DialogHeader className="pb-4">
-                                                <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
-                                                    <Gift className="h-6 w-6 text-primary" />
+                                                <DialogTitle className="flex items-center gap-2 text-xl font-bold sm:text-2xl">
+                                                    <Gift className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
                                                     Semua Status Stok Hadiah
                                                 </DialogTitle>
-                                                <p className="text-base text-gray-600 dark:text-gray-400">
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                                                     Daftar lengkap semua hadiah dan ketersediaan stok
                                                 </p>
                                             </DialogHeader>
-                                            <ScrollArea className="h-[650px] w-full rounded-lg">
-                                                <div className="space-y-4 p-2">
+                                            <ScrollArea className="h-[60vh] w-full rounded-lg sm:h-[70vh]">
+                                                <div className="space-y-3 p-2 sm:space-y-4">
                                                     {prizes.map((prize) => (
                                                         <div
                                                             key={prize.id}
-                                                            className="flex items-center justify-between rounded-xl border-2 p-6 shadow-sm transition-shadow hover:shadow-md"
+                                                            className="flex flex-col gap-4 rounded-xl border-2 p-4 shadow-sm transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:p-6"
                                                         >
-                                                            <div className="flex items-center gap-6">
-                                                                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-gray-50 dark:bg-gray-800">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-gray-50 dark:bg-gray-800 sm:h-20 sm:w-20">
                                                                     <img
                                                                         src={prize.imageUrl}
                                                                         alt="gambar hadiah"
@@ -245,19 +249,19 @@ export default function DoorprizeDashboard() {
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1 space-y-2">
-                                                                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                    <p className="text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
                                                                         {prize.name}
                                                                     </p>
-                                                                    <p className="text-base text-gray-600 dark:text-gray-400">
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                                                                         <span className="font-medium">{prize.stock}</span> dari{' '}
                                                                         <span className="font-medium">{prize.totalStock}</span> tersisa
                                                                     </p>
-                                                                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-500 sm:text-sm">
                                                                         {prize.totalStock - prize.stock} hadiah telah diberikan
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex flex-shrink-0 flex-col items-end gap-3">
+                                                            <div className="flex items-center justify-between sm:flex-col sm:items-end sm:gap-3">
                                                                 <Badge
                                                                     variant={prize.stock > 0 ? 'secondary' : 'destructive'}
                                                                     className="px-3 py-1 text-sm"
@@ -268,7 +272,7 @@ export default function DoorprizeDashboard() {
                                                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                                                         {Math.round((prize.stock / prize.totalStock) * 100)}%
                                                                     </span>
-                                                                    <div className="h-3 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
+                                                                    <div className="h-3 w-20 rounded-full bg-gray-200 dark:bg-gray-700 sm:w-24">
                                                                         <div
                                                                             className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
                                                                             style={{
@@ -287,30 +291,30 @@ export default function DoorprizeDashboard() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-3 sm:space-y-4">
                                     {displayedPrizes.map((prize) => (
                                         <div key={prize.id} className="flex items-center justify-between rounded-lg border p-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
-                                                    <img src={prize.imageUrl} alt="gambar" className={'h-full w-full object-cover'} />
+                                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-gray-100 sm:h-16 sm:w-16">
+                                                    <img src={prize.imageUrl} alt="gambar" className="h-full w-full object-cover" />
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium">{prize.name}</p>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate text-sm font-medium sm:text-base">{prize.name}</p>
+                                                    <p className="truncate text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
                                                         {prize.stock} dari {prize.totalStock} tersisa
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <div className="h-2 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
+                                                <div className="h-2 w-16 rounded-full bg-gray-200 dark:bg-gray-700 sm:w-24">
                                                     <div
-                                                        className={`h-2 rounded-full bg-primary transition-all duration-300`}
+                                                        className="h-2 rounded-full bg-primary transition-all duration-300"
                                                         style={{
                                                             width: `${(prize.stock / prize.totalStock) * 100}%`,
                                                         }}
                                                     />
                                                 </div>
-                                                <Badge variant={prize.stock > 0 ? 'secondary' : 'destructive'}>
+                                                <Badge variant={prize.stock > 0 ? 'secondary' : 'destructive'} className="text-xs">
                                                     {prize.stock > 0 ? 'Tersedia' : 'Habis'}
                                                 </Badge>
                                             </div>
@@ -335,7 +339,7 @@ export default function DoorprizeDashboard() {
                         {/* Recent Winners */}
                         <Card>
                             <CardHeader>
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <CardTitle className="flex items-center gap-2">
                                             <Users className="h-5 w-5" />
@@ -350,22 +354,24 @@ export default function DoorprizeDashboard() {
                                                 Lihat Semua
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-h-[85vh] max-w-4xl">
+                                        <DialogContent className="max-h-[90vh] max-w-[95vw] sm:max-w-3xl lg:max-w-5xl">
                                             <DialogHeader className="pb-4">
-                                                <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
-                                                    <Trophy className="h-6 w-6 text-primary" />
+                                                <DialogTitle className="flex items-center gap-2 text-xl font-bold sm:text-2xl">
+                                                    <Trophy className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
                                                     Semua Pemenang Doorprize
                                                 </DialogTitle>
-                                                <p className="text-base text-gray-600 dark:text-gray-400">Daftar lengkap semua pemenang doorprize</p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                                                    Daftar lengkap semua pemenang doorprize
+                                                </p>
                                             </DialogHeader>
-                                            <ScrollArea className="h-[650px] w-full rounded-lg">
-                                                <div className="space-y-4 p-2">
+                                            <ScrollArea className="h-[60vh] w-full rounded-lg sm:h-[70vh]">
+                                                <div className="space-y-3 p-2 sm:space-y-4">
                                                     {recentWinners.map((winner) => (
                                                         <div
                                                             key={winner.id}
-                                                            className="flex items-center gap-6 rounded-xl border-2 p-6 shadow-sm transition-shadow hover:shadow-md"
+                                                            className="flex flex-col gap-4 rounded-xl border-2 p-4 shadow-sm transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:gap-6 sm:p-6"
                                                         >
-                                                            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                                                            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg sm:h-16 sm:w-16">
                                                                 {winner.prize.imageUrl ? (
                                                                     <img
                                                                         src={winner.prize.imageUrl}
@@ -373,27 +379,29 @@ export default function DoorprizeDashboard() {
                                                                         className="h-full w-full object-contain"
                                                                     />
                                                                 ) : (
-                                                                    <Trophy className="h-8 w-8 text-white" />
+                                                                    <Trophy className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                                                                 )}
                                                             </div>
                                                             <div className="min-w-0 flex-1 space-y-2">
-                                                                <div className="flex items-center gap-3">
-                                                                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                                                                    <p className="text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
                                                                         {winner.employee.name}
                                                                     </p>
-                                                                    <Badge variant="outline" className="px-3 py-1 text-sm">
+                                                                    <Badge variant="outline" className="w-fit px-3 py-1 text-xs sm:text-sm">
                                                                         {winner.employee.employeeId}
                                                                     </Badge>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
                                                                     <Gift className="h-4 w-4 text-gray-500" />
-                                                                    <p className="text-base font-medium text-gray-700 dark:text-gray-300">
+                                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:text-base">
                                                                         {winner.prize.name}
                                                                     </p>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
                                                                     <Calendar className="h-4 w-4 text-gray-500" />
-                                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{winner.timestamp}</p>
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                                                                        {winner.timestamp}
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -408,7 +416,9 @@ export default function DoorprizeDashboard() {
                                 <div className="space-y-3">
                                     {displayedWinners.map((winner) => (
                                         <div key={winner.id} className="flex items-center gap-3 rounded-lg border p-2">
-                                            <Users />
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                                                <Users className="h-4 w-4 text-primary" />
+                                            </div>
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-sm font-medium">{winner.employee.name}</p>
                                                 <p className="truncate text-xs text-gray-600 dark:text-gray-400">{winner.prize.name}</p>
